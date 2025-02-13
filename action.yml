@@ -1,16 +1,138 @@
+# Copyright 2025 Robert Lindley
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# without warranties or conditions of any kind, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 author: Robert Lindley
-name: TypeScript Action Template
-description:
-  A GitHub Action template that provides all the necessary steps and
-  configurations to create a TypeScript GitHub Action.
+name: Commit and Push Changes
+description: |
+  This action automates committing and pushing code changes to a GitHub repository.
+  It ensures updates are regularly applied without manual intervention while following security best practices.
 
 branding:
-  color: 'green'
-  icon: 'book'
+  color: 'blue'
+  icon: 'git-commit'
 
-inputs: {}
-outputs: {}
+inputs:
+  github_token:
+    description:
+      GitHub token used for authentication (must have minimal required scopes)
+    required: false
+    default: ${{ github.token }}
+  github_hostname:
+    description: GitHub hostname (useful for enterprise installations)
+    required: false
+    default: 'github.com'
+  commit_message:
+    description: Commit message for the changes
+    required: true
+  commit_author_name:
+    description: Name of the commit author
+    required: false
+    default: 'GitHub Actions'
+  commit_author_email:
+    description: Email of the commit author
+    required: false
+    default: 'github-actions@noreply.github.com'
+  force_push:
+    description: Whether to force push (true/false)
+    required: false
+    default: 'false'
+  target_branch:
+    description: Name of the branch to push the code into
+    required: false
+    default: ''
+  directory_path:
+    description: Path to the directory containing files to commit and push
+    required: false
+    default: '.'
+  remote_ref:
+    description: Remote repository reference
+    required: false
+    default: 'origin'
+  sign_commit:
+    description: Whether to sign commits using GPG (true/false)
+    required: false
+    default: 'false'
+
+outputs:
+  commit_hash:
+    description: The hash of the latest commit
+    value: ${{ steps.commit-step.outputs.commit_hash }}
+
+  pushed_branch:
+    description: The branch where the changes were pushed
+    value: ${{ steps.push-step.outputs.pushed_branch }}
 
 runs:
-  using: 'node20'
-  main: './dist/index.mjs'
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      id: checkout-repository
+      uses: actions/checkout@v4
+
+    - name: Configure Git
+      id: configure-git
+      shell: bash
+      run: |
+        git config --global user.name "${{ inputs.commit_author_name }}"
+        git config --global user.email "${{ inputs.commit_author_email }}"
+        if [ "${{ inputs.sign_commit }}" == "true" ]; then
+          git config --global commit.gpgsign true
+          git config --global user.signingkey /github/home/.gnupg/private.key
+        fi
+
+    - name: Ensure target branch exists
+      id: ensure-branch-exists
+      shell: bash
+      run: |
+        git fetch --all
+        BRANCH="${{ inputs.target_branch }}"
+        if [ -n "$BRANCH" ] && ! git show-ref --verify --quiet refs/heads/$BRANCH; then
+          git checkout -b "$BRANCH"
+        else
+          git checkout "$BRANCH"
+        fi
+
+    - name: Stage changes
+      id: stage-step
+      shell: bash
+      run: git add "${{ inputs.directory_path }}"
+
+    - name: Commit changes
+      id: commit-step
+      shell: bash
+      run: |
+        if git diff --cached --quiet; then
+          echo "No changes to commit."
+          exit 0
+        fi
+
+        SIGN_OPTION=""
+        if [ "${{ inputs.sign_commit }}" == "true" ]; then
+          SIGN_OPTION="-S"
+        fi
+
+        git commit $SIGN_OPTION -m "${{ inputs.commit_message }}"
+        echo "commit_hash=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+    - name: Push changes
+      id: push-step
+      shell: bash
+      run: |
+        FORCE_OPTION=""
+        if [ "${{ inputs.force_push }}" == "true" ]; then
+          FORCE_OPTION="--force"
+        fi
+
+        git push $FORCE_OPTION "${{ inputs.remote_ref }}" HEAD:"${{ inputs.target_branch }}"
+        echo "pushed_branch=${{ inputs.target_branch }}" >> $GITHUB_ENV
