@@ -1,0 +1,61 @@
+# In TypeScript actions, `dist/` is a special directory. When you reference
+# an action with the `uses:` property, `dist/index.mjs` is the code that will be
+# run. For this project, the `dist/index.mjs` file is transpiled from other
+# source files. This workflow ensures the `dist/` directory contains the
+# expected transpiled code.
+#
+# If this workflow is run from a feature branch, it will act as an additional CI
+# check and fail if the checked-in `dist/` directory does not match what is
+# expected from the build.
+
+name: Check dist/ Contents
+
+description:
+  Ensure the transpiled dist/ directory matches the current source code. This
+  helps catch issues where the `dist/` directory is not updated after changes to
+  source code. This workflow is intended to be run on feature branches as an
+  additional CI check.
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: check-dist-${{ github.event_name }}-${{ github.ref }}-${{ github.job }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check-dist:
+    name: Check dist/
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        id: checkout-source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install Dependencies
+        id: install-dependencies
+        run: npm install
+
+      - name: Build dist/ Directory
+        id: build-dist
+        run: npm run package
+
+      - name: Compare Packages
+        id: compare-packages
+        run: bash script/distchk.sh

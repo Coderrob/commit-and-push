@@ -1,0 +1,16 @@
+author: Robert Lindley
+name: TypeScript Action Template
+description:
+  A GitHub Action template that provides all the necessary steps and
+  configurations to create a TypeScript GitHub Action.
+
+branding:
+  color: 'green'
+  icon: 'book'
+
+inputs: {}
+outputs: {}
+
+runs:
+  using: 'node20'
+  main: './dist/index.mjs'
