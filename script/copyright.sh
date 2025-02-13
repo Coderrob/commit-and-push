@@ -1,51 +1,54 @@
 #!/bin/bash
 
-# Exit early
-# See: https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#The-Set-Builtin
+# Exit early on error
 set -e
 
-# About: This script updates copyright notices in files.
-# Usage: ./script/copyright <directory>
+# Define the copyright notice (without comment style)
+readonly COPYRIGHT_NOTICE="Copyright 2025 Robert Lindley
 
-# Define the copyright notice
-readonly COPYRIGHT_NOTICE="
- * Copyright 2025 Robert Lindley
- *
- * Licensed under the Apache License, Version 2.0 (the \"License\");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an \"AS IS\" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
-"
+Licensed under the Apache License, Version 2.0 (the \"License\");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an \"AS IS\" BASIS,
+without warranties or conditions of any kind, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License."
 
 # Define supported extensions and their comment styles
 declare -A COMMENT_STYLES=(
-    ["sh"]="#"
+    ["c"]="//"
+    ["cpp"]="//"
+    ["cs"]="//"
+    ["go"]="//"
+    ["h"]="//"
+    ["hpp"]="//"
+    ["java"]="//"
+    ["js"]="//"
+    ["php"]="//"
     ["py"]="#"
-    ["js"]="/*"
-    ["ts"]="/*"
-    ["java"]="/*"
-    ["cpp"]="/*"
-    ["hpp"]="/*"
-    ["c"]="/*"
-    ["h"]="/*"
-    ["cs"]="/*"
-    ["go"]="/*"
-    ["swift"]="/*"
-    ["php"]="/*"
     ["rb"]="#"
+    ["sh"]="#"
+    ["swift"]="//"
+    ["ts"]="//"
+    ["yaml"]="#"
+    ["yml"]="#"
 )
 
-# Function to check if a file should be ignored
+# Function to check if a file or directory should be ignored
 should_ignore_file() {
     local file="$1"
+
+    # Normalize path to remove leading './'
+    file="${file#./}"
+
+    # Check if the file is within the .git directory
+    if [[ "$file" == ".git" || "$file" == ".git/"* || "$file" =~ ^\.git(/|$) ]]; then
+        return 0
+    fi
 
     # Check if the file is ignored by .gitignore
     git check-ignore -q "$file" && return 0
@@ -68,12 +71,12 @@ get_comment_style() {
 format_copyright_notice() {
     local style="$1"
 
-    if [[ "$style" == "/*" ]]; then
-        echo -e "/*$COPYRIGHT_NOTICE */
-"
-    else
-        echo -e "${COPYRIGHT_NOTICE//^/$style}" | sed 's/^/$/'
+    if [[ -z "$style" ]]; then
+        echo "Error: Unsupported file type. Skipping." >&2
+        return 1
     fi
+
+    echo "$COPYRIGHT_NOTICE" | sed "s/^/$style /"
 }
 
 # Function to prepend the copyright notice to a file
@@ -93,9 +96,9 @@ prepend_copyright() {
 
     # Prepend the copyright notice
     {
-        echo -e "$formatted_notice"
+        echo -e "$formatted_notice\n"
         cat "$file"
-    } > temp_file && mv temp_file "$file"
+    } >temp_file && mv temp_file "$file"
 
     echo -e "Updated: $file"
 }
@@ -106,16 +109,15 @@ scan_directory() {
 
     find "$dir" -type f | while read -r file; do
         # Skip ignored files and directories
-        echo -e "checking $file"
         should_ignore_file "$file" || prepend_copyright "$file"
     done
 }
 
 # Ensure a directory argument is provided
-[[ $# -ne 1 ]] && {
+if [[ $# -ne 1 ]]; then
     echo "Usage: $0 <directory>"
     exit 1
-}
+fi
 
 echo -e "Processing..."
 scan_directory "$1"
