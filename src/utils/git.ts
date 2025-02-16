@@ -1,0 +1,60 @@
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import { isError, isString } from './guards.js';
+import { DISALLOWED_PATTERNS, ICommand, ALLOWED_COMMANDS } from '../types.js';
+
+/**
+ * Checks if the command execution resulted in successful
+ * exit code response. Successful being defined as an exit code of `0`.
+ * @param {ExecOutput} execOutput  - An object containing the command and arguments to execute
+ * @returns {boolean} - The output of the executed command
+ */
+export function isExecOutputSuccess({ exitCode }: exec.ExecOutput): boolean {
+  return exitCode === core.ExitCode.Success;
+}
+
+/**
+ * Sanitizes the input string to prevent security risks.
+ * @param input - The input string to sanitize
+ * @returns sanitized input string or throws an error if the input is invalid or contains a security risk.
+ */
+export function sanitizeInput(input: string): string {
+  if (!isString(input)) {
+    throw new Error('Invalid input type');
+  }
+  if (DISALLOWED_PATTERNS.some((pattern) => pattern.test(input))) {
+    throw new Error(`Security risk detected in input: ${input}`);
+  }
+  return input;
+}
+
+/**
+ * Executes a Git command with the provided arguments.
+ * @param command - The Git command to execute
+ * @returns the exit code of the Git command. If there are any errors, the exit code will be non-zero.
+ */
+export async function execCommand({
+  command,
+  args = []
+}: ICommand): Promise<exec.ExecOutput> {
+  if (!ALLOWED_COMMANDS.some((allowed) => allowed === command)) {
+    throw new Error(`Unauthorized Git command: ${command}`);
+  }
+
+  const sanitizedArgs = args.map(sanitizeInput).join(' ');
+  const gitCommand = ['git', command, sanitizedArgs].join(' ').trim();
+
+  try {
+    const { exitCode, stdout, stderr } = await exec.getExecOutput(gitCommand);
+    core.info(`Git output: ${stdout}`);
+    core.info(`Git errors: ${stderr}`);
+    return {
+      exitCode,
+      stdout,
+      stderr
+    };
+  } catch (error) {
+    const message = isError(error) ? error.message : String(error);
+    throw new Error(`Git command failed: ${message}`);
+  }
+}
