@@ -69,7 +69,11 @@ describe('git', () => {
         command: GitCommand.STATUS,
         args: []
       });
-      expect(result).toBe(0);
+      expect(result).toEqual({
+        exitCode: undefined,
+        stderr: undefined,
+        stdout: 'some output'
+      });
       expect(getExecOutput).toHaveBeenCalledWith('git status');
       expect(mockInfo).toHaveBeenCalledTimes(2);
       expect(mockInfo).toHaveBeenNthCalledWith(1, 'Git output: some output');
@@ -82,7 +86,11 @@ describe('git', () => {
         command: GitCommand.STATUS,
         args: []
       });
-      expect(result).toEqual(1);
+      expect(result).toEqual({
+        exitCode: undefined,
+        stderr: 'some output',
+        stdout: undefined
+      });
       expect(getExecOutput).toHaveBeenCalledWith('git status');
       expect(mockInfo).toHaveBeenCalledTimes(2);
       expect(mockInfo).toHaveBeenNthCalledWith(1, 'Git output: undefined');

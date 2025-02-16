@@ -82,7 +82,6 @@ export abstract class BaseAction implements ICommitAndPush {
   }
 
   async commitChanges(): Promise<number> {
-    // Commit changes
     try {
       const { exitCode } = await execCommand({
         command: COMMIT,
