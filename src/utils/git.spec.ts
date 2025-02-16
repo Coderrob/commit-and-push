@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import { Command } from '../types.js';
+import { GitCommand } from '../types.js';
 import { execCommand, sanitizeInput } from './git.js';
 
 describe('git', () => {
@@ -47,7 +47,7 @@ describe('git', () => {
     test('should throw an error for unauthorized Git command', async () => {
       await expect(() =>
         execCommand({
-          command: 'unknown-command' as unknown as Command
+          command: 'unknown-command' as unknown as GitCommand
         })
       ).rejects.toThrow(`Unauthorized Git command: unknown-command`);
       expect(getExecOutput).toHaveBeenCalledTimes(0);
@@ -57,7 +57,7 @@ describe('git', () => {
     test('should throw an error for getExecOutput failure', async () => {
       getExecOutput.mockRejectedValueOnce(new Error('Overdue electric bill'));
       await expect(() =>
-        execCommand({ command: Command.PUSH })
+        execCommand({ command: GitCommand.PUSH })
       ).rejects.toThrow(`Git command failed: Overdue electric bill`);
       expect(getExecOutput).toHaveBeenCalledTimes(1);
       expect(mockInfo).toHaveBeenCalledTimes(0);
@@ -65,7 +65,10 @@ describe('git', () => {
 
     test('should execute a valid Git command and return the successful exit code', async () => {
       getExecOutput.mockResolvedValueOnce({ stdout: 'some output' });
-      const result = await execCommand({ command: Command.STATUS, args: [] });
+      const result = await execCommand({
+        command: GitCommand.STATUS,
+        args: []
+      });
       expect(result).toBe(0);
       expect(getExecOutput).toHaveBeenCalledWith('git status');
       expect(mockInfo).toHaveBeenCalledTimes(2);
@@ -75,7 +78,10 @@ describe('git', () => {
 
     test('should return a non-zero failure exit code if the execSync call returns errors', async () => {
       getExecOutput.mockResolvedValueOnce({ stderr: 'some output' });
-      const result = await execCommand({ command: Command.STATUS, args: [] });
+      const result = await execCommand({
+        command: GitCommand.STATUS,
+        args: []
+      });
       expect(result).toEqual(1);
       expect(getExecOutput).toHaveBeenCalledWith('git status');
       expect(mockInfo).toHaveBeenCalledTimes(2);

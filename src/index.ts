@@ -16,21 +16,21 @@
  *
  */
 
-import * as core from '@actions/core';
-
-import { run } from './action.js';
-
-const REQUIRED_INPUT = Object.freeze({ required: true });
+import { Action } from './action.js';
+import { Input } from './types.js';
+import { getInputValue } from './inputs.js';
 
 (async () => {
-  await run({
-    authorEmail: core.getInput('author_email'),
-    authorName: core.getInput('author_name'),
-    branch: core.getInput('branch'),
-    commitMessage: core.getInput('commit_message', REQUIRED_INPUT),
-    directoryPath: core.getInput('directory_path'),
-    forcePush: core.getBooleanInput('force_push'),
-    remoteRef: core.getInput('remote_ref'),
-    signCommit: core.getBooleanInput('sign_commit')
-  });
+  await new Action({
+    [Input.AUTHOR_EMAIL]: getInputValue[Input.AUTHOR_EMAIL],
+    [Input.AUTHOR_NAME]: getInputValue[Input.AUTHOR_NAME],
+    [Input.COMMIT_MESSAGE]: getInputValue[Input.COMMIT_MESSAGE],
+    [Input.DIRECTORY_PATH]: getInputValue[Input.DIRECTORY_PATH],
+    [Input.FORCE_PUSH]: getInputValue[Input.FORCE_PUSH],
+    [Input.GITHUB_HOSTNAME]: getInputValue[Input.GITHUB_HOSTNAME],
+    [Input.GITHUB_TOKEN]: getInputValue[Input.GITHUB_TOKEN],
+    [Input.REMOTE_REF]: getInputValue[Input.REMOTE_REF],
+    [Input.SIGN_COMMIT]: getInputValue[Input.SIGN_COMMIT],
+    [Input.TARGET_BRANCH]: getInputValue[Input.TARGET_BRANCH]
+  }).execute();
 })();

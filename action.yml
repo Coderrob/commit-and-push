@@ -33,13 +33,14 @@ inputs:
     description: GitHub hostname (useful for enterprise installations)
     required: false
   commit_message:
+    default: 'Automated commit by GitHub Actions'
     description: Commit message for the changes
-    required: true
+    required: false
   force_push:
     default: 'false'
     description: Whether to force push (true/false)
     required: false
-  branch:
+  target_branch:
     default: ''
     description: Name of the branch to push the code into
     required: false
