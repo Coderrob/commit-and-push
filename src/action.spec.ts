@@ -48,11 +48,11 @@ describe('Action', () => {
       expect(exitCode).toEqual(0);
       expect(execCommandMock).toHaveBeenCalledTimes(3);
       expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['--global', 'user.name', 'Captain Picard'],
+        args: ['--global', 'user.name', '"Captain Picard"'],
         command: 'config'
       });
       expect(execCommandMock).toHaveBeenNthCalledWith(2, {
-        args: ['--global', 'user.email', 'jedi@example.com'],
+        args: ['--global', 'user.email', '"jedi@example.com"'],
         command: 'config'
       });
       expect(execCommandMock).toHaveBeenNthCalledWith(3, {
@@ -82,7 +82,7 @@ describe('Action', () => {
       expect(exitCode).toEqual(0);
       expect(execCommandMock).toHaveBeenCalledTimes(1);
       expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['main'],
+        args: ['"main"'],
         command: 'checkout'
       });
     });
@@ -95,7 +95,7 @@ describe('Action', () => {
       expect(exitCode).toEqual(0);
       expect(execCommandMock).toHaveBeenCalledTimes(1);
       expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['/path/to/mordor'],
+        args: ['"/path/to/mordor"'],
         command: 'add'
       });
     });
@@ -108,7 +108,7 @@ describe('Action', () => {
       expect(exitCode).toEqual(0);
       expect(execCommandMock).toHaveBeenCalledTimes(1);
       expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['-S', '-m', 'You shall not pass!'],
+        args: ['-S', '-m', '"You shall not pass!"'],
         command: 'commit'
       });
     });
