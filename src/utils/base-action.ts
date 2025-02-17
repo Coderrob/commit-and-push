@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import { ExitCode } from '@actions/core';
 import { GitCommand, ICommitAndPush, Input } from '../types.js';
 import { execCommand, isExecOutputSuccess } from './git.js';
-import { isTrue } from './guards.js';
+import { isError, isTrue } from './guards.js';
 
 const { ADD, CONFIG, FETCH, CHECKOUT, COMMIT, PUSH, REV_PARSE } = GitCommand;
 
@@ -90,8 +90,9 @@ export abstract class BaseAction implements ICommitAndPush {
           : ['-m', this.commitMessage]
       });
       return exitCode;
-    } catch {
-      core.info('No changes detected. Skipping commit.');
+    } catch (error) {
+      const message = isError(error) ? error.message : String(error);
+      core.info(`No changes detected. Skipping commit. ${message}`);
       return ExitCode.Success;
     }
   }
