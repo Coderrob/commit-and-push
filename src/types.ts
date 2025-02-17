@@ -1,15 +1,36 @@
+/*
+ * Copyright 2025 Robert Lindley
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 export enum Input {
-  AUTHOR_EMAIL = 'author_email',
-  AUTHOR_NAME = 'author_name',
-  BRANCH_TARGET = 'branch_target',
-  COMMIT_MESSAGE = 'commit_message',
-  CREATE_BRANCH = 'create_branch',
-  DIRECTORY_PATH = 'directory_path',
-  FORCE_PUSH = 'force_push',
-  GITHUB_HOSTNAME = 'github_hostname',
-  GITHUB_TOKEN = 'github_token',
-  REMOTE_REF = 'remote_ref',
-  SIGN_COMMIT = 'sign_commit'
+  AUTHOR_EMAIL = 'author-email',
+  AUTHOR_NAME = 'author-name',
+  BRANCH_TARGET = 'branch-target',
+  COMMIT_MESSAGE = 'commit-message',
+  CREATE_BRANCH = 'create-branch',
+  DIRECTORY_PATH = 'directory-path',
+  FORCE_PUSH = 'force-push',
+  GITHUB_HOSTNAME = 'github-hostname',
+  GITHUB_TOKEN = 'github-token',
+  REMOTE_REF = 'remote-ref',
+  SIGN_COMMIT = 'sign-commit'
+}
+
+export enum Output {
+  COMMIT_HASH = 'commit-hash'
 }
 
 export enum GitCommand {

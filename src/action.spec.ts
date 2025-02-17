@@ -1,3 +1,20 @@
+/*
+ * Copyright 2025 Robert Lindley
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 import * as core from '@actions/core';
 import { Action } from './action.js';
 import { execCommand, isExecOutputSuccess } from './utils/git.js';
@@ -16,17 +33,17 @@ describe('Action', () => {
   let isExecOutputSuccessMock: jest.Mock;
 
   const mockInputs: Record<Input, string> = {
-    author_email: 'jedi@example.com',
-    author_name: 'Captain Picard',
-    branch_target: 'main', // target branch for the commit
-    commit_message: 'You shall not pass!',
-    create_branch: 'false',
-    directory_path: '/path/to/mordor',
-    force_push: 'true', // push it, push it real good <3 S&P
-    github_hostname: 'github.com',
-    github_token: 'my-precious',
-    remote_ref: 'origin',
-    sign_commit: 'true' // interpreter's fingers going to be sore from base 64
+    [Input.AUTHOR_EMAIL]: 'jedi@example.com',
+    [Input.AUTHOR_NAME]: 'Captain Picard',
+    [Input.BRANCH_TARGET]: 'main', // target branch for the commit
+    [Input.COMMIT_MESSAGE]: 'You shall not pass!',
+    [Input.CREATE_BRANCH]: 'false',
+    [Input.DIRECTORY_PATH]: '/path/to/mordor',
+    [Input.FORCE_PUSH]: 'true', // push it, push it real good <3 S&P
+    [Input.GITHUB_HOSTNAME]: 'github.com',
+    [Input.GITHUB_TOKEN]: 'my-precious',
+    [Input.REMOTE_REF]: 'origin',
+    [Input.SIGN_COMMIT]: 'true' // interpreter's fingers going to be sore from base 64
   };
 
   beforeEach(() => {
@@ -155,7 +172,7 @@ describe('Action', () => {
       expect(setOutputSpy).toHaveBeenCalledTimes(1);
       expect(setOutputSpy).toHaveBeenNthCalledWith(
         1,
-        'commit_hash',
+        'commit-hash',
         '1234567890'
       );
     });
