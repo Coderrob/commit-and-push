@@ -18,14 +18,15 @@ describe('Action', () => {
   const mockInputs: Record<Input, string> = {
     author_email: 'jedi@example.com',
     author_name: 'Captain Picard',
+    branch_target: 'main', // target branch for the commit
     commit_message: 'You shall not pass!',
+    create_branch: 'false',
     directory_path: '/path/to/mordor',
     force_push: 'true', // push it, push it real good <3 S&P
     github_hostname: 'github.com',
     github_token: 'my-precious',
-    remote_ref: 'refs/heads/main',
-    sign_commit: 'true', // interpreter's fingers going to be sore from base 64
-    target_branch: 'main' // target branch for the commit
+    remote_ref: 'origin',
+    sign_commit: 'true' // interpreter's fingers going to be sore from base 64
   };
 
   beforeEach(() => {
@@ -82,14 +83,31 @@ describe('Action', () => {
       expect(exitCode).toEqual(0);
       expect(execCommandMock).toHaveBeenCalledTimes(1);
       expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['"main"'],
+        args: ['main'],
+        command: 'checkout'
+      });
+    });
+
+    it('should checkout a new branch', async () => {
+      execCommandMock.mockResolvedValueOnce({ exitCode: 0 });
+      const checkoutNewBranchInput = {
+        ...mockInputs,
+        [Input.CREATE_BRANCH]: 'true'
+      };
+      const exitCode = await new Action(
+        checkoutNewBranchInput
+      ).checkoutBranch();
+      expect(exitCode).toEqual(0);
+      expect(execCommandMock).toHaveBeenCalledTimes(1);
+      expect(execCommandMock).toHaveBeenNthCalledWith(1, {
+        args: ['-b', 'main'],
         command: 'checkout'
       });
     });
   });
 
   describe('stageChanges', () => {
-    it('should checkout a specific branch', async () => {
+    it('should stage changes in the specified directory', async () => {
       execCommandMock.mockResolvedValueOnce({ exitCode: 0 });
       const exitCode = await new Action(mockInputs).stageChanges();
       expect(exitCode).toEqual(0);
@@ -102,7 +120,7 @@ describe('Action', () => {
   });
 
   describe('commitChanges', () => {
-    it('should checkout a specific branch', async () => {
+    it('should commit changes with the specified message and sign them if required', async () => {
       execCommandMock.mockResolvedValueOnce({ exitCode: 0 });
       const exitCode = await new Action(mockInputs).commitChanges();
       expect(exitCode).toEqual(0);
@@ -115,7 +133,7 @@ describe('Action', () => {
   });
 
   describe('pushChanges', () => {
-    it('should checkout a specific branch', async () => {
+    it('should push changes to the specified remote and branch with force if required', async () => {
       execCommandMock
         .mockResolvedValueOnce({ exitCode: 0 })
         .mockResolvedValueOnce({ exitCode: 0, stdout: '1234567890' });
@@ -126,7 +144,7 @@ describe('Action', () => {
       expect(exitCode).toEqual(0);
       expect(execCommandMock).toHaveBeenCalledTimes(2);
       expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['--force', 'refs/heads/main', 'HEAD:main'],
+        args: ['origin', 'main', '--force'],
         command: 'push'
       });
       expect(execCommandMock).toHaveBeenNthCalledWith(2, {
@@ -144,7 +162,7 @@ describe('Action', () => {
   });
 
   describe('execute', () => {
-    it('should execute the action and return the result', async () => {
+    it('should execute all steps', async () => {
       const action = new Action(mockInputs);
 
       jest.spyOn(action, 'updateConfig').mockReturnValue(Promise.resolve(0));

@@ -24,13 +24,14 @@ import { getInputValue } from './inputs.js';
   await new Action({
     [Input.AUTHOR_EMAIL]: getInputValue[Input.AUTHOR_EMAIL],
     [Input.AUTHOR_NAME]: getInputValue[Input.AUTHOR_NAME],
+    [Input.BRANCH_TARGET]: getInputValue[Input.BRANCH_TARGET],
     [Input.COMMIT_MESSAGE]: getInputValue[Input.COMMIT_MESSAGE],
+    [Input.CREATE_BRANCH]: getInputValue[Input.CREATE_BRANCH],
     [Input.DIRECTORY_PATH]: getInputValue[Input.DIRECTORY_PATH],
     [Input.FORCE_PUSH]: getInputValue[Input.FORCE_PUSH],
     [Input.GITHUB_HOSTNAME]: getInputValue[Input.GITHUB_HOSTNAME],
     [Input.GITHUB_TOKEN]: getInputValue[Input.GITHUB_TOKEN],
     [Input.REMOTE_REF]: getInputValue[Input.REMOTE_REF],
-    [Input.SIGN_COMMIT]: getInputValue[Input.SIGN_COMMIT],
-    [Input.TARGET_BRANCH]: getInputValue[Input.TARGET_BRANCH]
+    [Input.SIGN_COMMIT]: getInputValue[Input.SIGN_COMMIT]
   }).execute();
 })();
