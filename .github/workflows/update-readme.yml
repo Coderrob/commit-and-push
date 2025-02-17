@@ -38,5 +38,5 @@ jobs:
         id: commit-and-push-readme
         uses: coderrob/commit-and-push@main
         with:
-          branch_target: main
-          directory_path: './README.md'
+          branch-target: main
+          directory-path: './README.md'
