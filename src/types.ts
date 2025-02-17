@@ -1,14 +1,15 @@
 export enum Input {
-  GITHUB_TOKEN = 'github_token',
-  GITHUB_HOSTNAME = 'github_hostname',
-  COMMIT_MESSAGE = 'commit_message',
-  FORCE_PUSH = 'force_push',
-  TARGET_BRANCH = 'target_branch',
-  DIRECTORY_PATH = 'directory_path',
-  REMOTE_REF = 'remote_ref',
-  SIGN_COMMIT = 'sign_commit',
+  AUTHOR_EMAIL = 'author_email',
   AUTHOR_NAME = 'author_name',
-  AUTHOR_EMAIL = 'author_email'
+  BRANCH_TARGET = 'branch_target',
+  COMMIT_MESSAGE = 'commit_message',
+  CREATE_BRANCH = 'create_branch',
+  DIRECTORY_PATH = 'directory_path',
+  FORCE_PUSH = 'force_push',
+  GITHUB_HOSTNAME = 'github_hostname',
+  GITHUB_TOKEN = 'github_token',
+  REMOTE_REF = 'remote_ref',
+  SIGN_COMMIT = 'sign_commit'
 }
 
 export enum GitCommand {

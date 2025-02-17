@@ -15,22 +15,25 @@ export abstract class BaseAction implements ICommitAndPush {
   private readonly directoryPath: string;
   private readonly forcePush: boolean;
   private readonly remoteRef: string;
+  private readonly createBranch: boolean;
   private readonly signCommit: boolean;
 
   constructor({
     [Input.AUTHOR_EMAIL]: authorEmail,
     [Input.AUTHOR_NAME]: authorName,
+    [Input.BRANCH_TARGET]: branch,
     [Input.COMMIT_MESSAGE]: commitMessage,
+    [Input.CREATE_BRANCH]: createBranch,
     [Input.DIRECTORY_PATH]: directoryPath,
     [Input.FORCE_PUSH]: forcePush,
     [Input.REMOTE_REF]: remoteRef,
-    [Input.SIGN_COMMIT]: signCommit,
-    [Input.TARGET_BRANCH]: branch
+    [Input.SIGN_COMMIT]: signCommit
   }: Record<Input, string>) {
     this.authorEmail = authorEmail;
     this.authorName = authorName;
     this.branch = branch;
     this.commitMessage = commitMessage;
+    this.createBranch = isTrue(createBranch);
     this.directoryPath = directoryPath;
     this.forcePush = isTrue(forcePush);
     this.remoteRef = remoteRef;
@@ -69,7 +72,7 @@ export abstract class BaseAction implements ICommitAndPush {
   async checkoutBranch(): Promise<number> {
     const { exitCode } = await execCommand({
       command: CHECKOUT,
-      args: [ensureQuoted(this.branch)]
+      args: this.createBranch ? ['-b', this.branch] : [this.branch]
     });
     return exitCode;
   }
@@ -102,25 +105,25 @@ export abstract class BaseAction implements ICommitAndPush {
     const pushExecResult = await execCommand({
       command: PUSH,
       args: this.forcePush
-        ? ['--force', this.remoteRef, `HEAD:${this.branch}`]
-        : [this.remoteRef, `HEAD:${this.branch}`]
+        ? [this.remoteRef, this.branch, '--force']
+        : [this.remoteRef, this.branch]
     });
 
     if (!isExecOutputSuccess(pushExecResult)) {
       return ExitCode.Failure;
     }
 
-    const revParseExecResult = await execCommand({
+    const getCommitHashResult = await execCommand({
       command: REV_PARSE,
       args: ['HEAD']
     });
 
-    if (!isExecOutputSuccess(revParseExecResult)) {
-      const message = `Failed to get commit hash: ${revParseExecResult.stderr}`;
+    if (!isExecOutputSuccess(getCommitHashResult)) {
+      const message = `Failed to get commit hash: ${getCommitHashResult.stderr}`;
       throw new Error(message);
     }
 
-    core.setOutput('commit_hash', revParseExecResult.stdout);
+    core.setOutput('commit_hash', getCommitHashResult.stdout);
     return core.ExitCode.Success;
   }
 }

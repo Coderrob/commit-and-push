@@ -1,5 +1,19 @@
-export function ensureQuoted(value: string): string {
-  const hasDoubleQuotes = value.startsWith('"') && value.endsWith('"');
-  const hasSingleQuotes = value.startsWith("'") && value.endsWith("'");
-  return hasDoubleQuotes || hasSingleQuotes ? value : `"${value}"`;
+enum Quote {
+  SINGLE = "'",
+  DOUBLE = '"'
+}
+
+export function ensureQuoted(value: string, quote = Quote.DOUBLE): string {
+  const length = value.length;
+  const hasDoubleQuotes =
+    length > 1 &&
+    value.startsWith(Quote.DOUBLE) &&
+    value.endsWith(Quote.DOUBLE);
+  const hasSingleQuotes =
+    length > 1 &&
+    value.startsWith(Quote.SINGLE) &&
+    value.endsWith(Quote.SINGLE);
+  return hasDoubleQuotes || hasSingleQuotes
+    ? value
+    : [quote, value, quote].join('');
 }

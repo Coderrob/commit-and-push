@@ -32,30 +32,6 @@ inputs:
     default: 'github.com'
     description: GitHub hostname (useful for enterprise installations)
     required: false
-  commit_message:
-    default: 'Automated commit by GitHub Actions'
-    description: Commit message for the changes
-    required: false
-  force_push:
-    default: 'false'
-    description: Whether to force push (true/false)
-    required: false
-  target_branch:
-    default: ''
-    description: Name of the branch to push the code into
-    required: false
-  directory_path:
-    default: '.'
-    description: Path to the directory containing files to commit and push
-    required: false
-  remote_ref:
-    default: 'origin'
-    description: Remote repository reference
-    required: false
-  sign_commit:
-    default: 'false'
-    description: Whether to sign commits using GPG (true/false)
-    required: false
   author_name:
     default: 'GitHub Actions'
     description: Name of the commit author
@@ -63,6 +39,34 @@ inputs:
   author_email:
     default: 'github-actions@noreply.github.com'
     description: Email of the commit author
+    required: false
+  sign_commit:
+    default: 'false'
+    description: Whether to sign commits using GPG (true/false)
+    required: false
+  commit_message:
+    default: 'Automated commit by GitHub Actions'
+    description: Commit message for the changes
+    required: false
+  remote_ref:
+    default: 'origin'
+    description: Remote repository reference
+    required: false
+  branch_target:
+    default: 'main'
+    description: Name of the branch to push the code into
+    required: false
+  create_branch:
+    default: 'false'
+    description: Create branch if it does not exist
+    required: false
+  directory_path:
+    default: '.'
+    description: Path to the directory containing files to commit and push
+    required: false
+  force_push:
+    default: 'false'
+    description: Whether to force push (true/false)
     required: false
 
 outputs:

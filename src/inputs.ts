@@ -16,10 +16,24 @@ export const actionInputs: Record<Input, InputEntry> = {
     required: false,
     deprecationMessage: ''
   },
+  [Input.BRANCH_TARGET]: {
+    id: Input.BRANCH_TARGET,
+    description: 'The branch target to push the commit to',
+    default: 'main',
+    required: false,
+    deprecationMessage: ''
+  },
   [Input.COMMIT_MESSAGE]: {
     id: Input.COMMIT_MESSAGE,
     description: 'The commit message to use for the commit',
     default: 'Automated commit-and-push by GitHub Actions',
+    required: false,
+    deprecationMessage: ''
+  },
+  [Input.CREATE_BRANCH]: {
+    id: Input.CREATE_BRANCH,
+    description: 'Whether to create the branch if it is missing',
+    default: 'false',
     required: false,
     deprecationMessage: ''
   },
@@ -55,7 +69,7 @@ export const actionInputs: Record<Input, InputEntry> = {
   [Input.REMOTE_REF]: {
     id: Input.REMOTE_REF,
     description: 'The remote reference to use for the commit',
-    default: 'refs/heads/main',
+    default: 'origin',
     required: false,
     deprecationMessage: ''
   },
@@ -63,13 +77,6 @@ export const actionInputs: Record<Input, InputEntry> = {
     id: Input.SIGN_COMMIT,
     description: 'Whether to sign the commit',
     default: 'false',
-    required: false,
-    deprecationMessage: ''
-  },
-  [Input.TARGET_BRANCH]: {
-    id: Input.TARGET_BRANCH,
-    description: 'The target branch to push the commit to',
-    default: 'main',
     required: false,
     deprecationMessage: ''
   }
