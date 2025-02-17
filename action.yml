@@ -68,68 +68,7 @@ inputs:
 outputs:
   commit_hash:
     description: The hash of the latest commit
-    value: ${{ steps.commit-step.outputs.commit_hash }}
 
 runs:
-  using: 'composite'
-  steps:
-    - name: Checkout repository
-      id: checkout-repository
-      uses: actions/checkout@v4
-
-    - name: Configure Git
-      id: configure-git
-      shell: bash
-      run: |
-        git config --global user.name "${{ inputs.commit_author_name }}"
-        git config --global user.email "${{ inputs.commit_author_email }}"
-        if [ "${{ inputs.sign_commit }}" == "true" ]; then
-          git config --global commit.gpgsign true
-          git config --global user.signingkey /github/home/.gnupg/private.key
-        fi
-
-    - name: Ensure target branch exists
-      id: ensure-branch-exists
-      shell: bash
-      run: |
-        git fetch --all
-        BRANCH="${{ inputs.target_branch }}"
-        if [ -n "$BRANCH" ] && ! git show-ref --verify --quiet refs/heads/$BRANCH; then
-          git checkout -b "$BRANCH"
-        else
-          git checkout "$BRANCH"
-        fi
-
-    - name: Stage changes
-      id: stage-step
-      shell: bash
-      run: git add "${{ inputs.directory_path }}"
-
-    - name: Commit changes
-      id: commit-step
-      shell: bash
-      run: |
-        if git diff --cached --quiet; then
-          echo "No changes to commit."
-          exit 0
-        fi
-
-        SIGN_OPTION=""
-        if [ "${{ inputs.sign_commit }}" == "true" ]; then
-          SIGN_OPTION="-S"
-        fi
-
-        git commit $SIGN_OPTION -m "${{ inputs.commit_message }}"
-        echo "commit_hash=$(git rev-parse HEAD)" >> $GITHUB_ENV
-
-    - name: Push changes
-      id: push-step
-      shell: bash
-      run: |
-        FORCE_OPTION=""
-        if [ "${{ inputs.force_push }}" == "true" ]; then
-          FORCE_OPTION="--force"
-        fi
-
-        git push $FORCE_OPTION "${{ inputs.remote_ref }}" HEAD:"${{ inputs.target_branch }}"
-        echo "pushed_branch=${{ inputs.target_branch }}" >> $GITHUB_ENV
+  using: 'node20'
+  main: 'dist/index.mjs'

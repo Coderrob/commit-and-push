@@ -2,7 +2,8 @@ import * as core from '@actions/core';
 import { ExitCode } from '@actions/core';
 import { GitCommand, ICommitAndPush, Input } from '../types.js';
 import { execCommand, isExecOutputSuccess } from './git.js';
-import { isTrue } from './guards.js';
+import { isError, isTrue } from './guards.js';
+import { ensureQuoted } from './common.js';
 
 const { ADD, CONFIG, FETCH, CHECKOUT, COMMIT, PUSH, REV_PARSE } = GitCommand;
 
@@ -40,12 +41,12 @@ export abstract class BaseAction implements ICommitAndPush {
     // Set the required global git user name
     await execCommand({
       command: CONFIG,
-      args: ['--global', 'user.name', this.authorName]
+      args: ['--global', 'user.name', ensureQuoted(this.authorName)]
     });
     // Set the required global git user email
     await execCommand({
       command: CONFIG,
-      args: ['--global', 'user.email', this.authorEmail]
+      args: ['--global', 'user.email', ensureQuoted(this.authorEmail)]
     });
     // Enable GPG signing if requested
     if (this.signCommit) {
@@ -68,7 +69,7 @@ export abstract class BaseAction implements ICommitAndPush {
   async checkoutBranch(): Promise<number> {
     const { exitCode } = await execCommand({
       command: CHECKOUT,
-      args: [this.branch]
+      args: [ensureQuoted(this.branch)]
     });
     return exitCode;
   }
@@ -76,7 +77,7 @@ export abstract class BaseAction implements ICommitAndPush {
   async stageChanges(): Promise<number> {
     const { exitCode } = await execCommand({
       command: ADD,
-      args: [this.directoryPath]
+      args: [ensureQuoted(this.directoryPath)]
     });
     return exitCode;
   }
@@ -86,18 +87,18 @@ export abstract class BaseAction implements ICommitAndPush {
       const { exitCode } = await execCommand({
         command: COMMIT,
         args: this.signCommit
-          ? ['-S', '-m', this.commitMessage]
-          : ['-m', this.commitMessage]
+          ? ['-S', '-m', ensureQuoted(this.commitMessage)]
+          : ['-m', ensureQuoted(this.commitMessage)]
       });
       return exitCode;
-    } catch {
-      core.info('No changes detected. Skipping commit.');
+    } catch (error) {
+      const message = isError(error) ? error.message : String(error);
+      core.info(`No changes detected. Skipping commit. ${message}`);
       return ExitCode.Success;
     }
   }
 
   async pushChanges(): Promise<number> {
-    // Push changes
     const pushExecResult = await execCommand({
       command: PUSH,
       args: this.forcePush
