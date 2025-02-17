@@ -27,6 +27,10 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout Source
+        id: checkout
+        uses: actions/checkout@v4
+
       - name: Update README
         id: update-readme
         uses: coderrob/update-action-readme@main
@@ -38,5 +42,5 @@ jobs:
         id: commit-and-push-readme
         uses: coderrob/commit-and-push@main
         with:
-          branch_target: main
-          directory_path: './README.md'
+          branch-target: main
+          directory-path: './README.md'
