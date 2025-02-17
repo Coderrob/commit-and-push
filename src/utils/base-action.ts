@@ -86,8 +86,8 @@ export abstract class BaseAction implements ICommitAndPush {
       const { exitCode } = await execCommand({
         command: COMMIT,
         args: this.signCommit
-          ? ['-S', '-m', this.commitMessage]
-          : ['-m', this.commitMessage]
+          ? ['-S', '-m', `"${this.commitMessage}"`]
+          : ['-m', `"${this.commitMessage}"`]
       });
       return exitCode;
     } catch (error) {
