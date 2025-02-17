@@ -23,54 +23,54 @@ branding:
   icon: 'git-commit'
 
 inputs:
-  github_token:
+  github-token:
     default: ${{ github.token }}
     description:
       GitHub token used for authentication (must have minimal required scopes)
     required: false
-  github_hostname:
+  github-hostname:
     default: 'github.com'
     description: GitHub hostname (useful for enterprise installations)
     required: false
-  author_name:
+  author-name:
     default: 'GitHub Actions'
     description: Name of the commit author
     required: false
-  author_email:
+  author-email:
     default: 'github-actions@noreply.github.com'
     description: Email of the commit author
     required: false
-  sign_commit:
+  sign-commit:
     default: 'false'
     description: Whether to sign commits using GPG (true/false)
     required: false
-  commit_message:
+  commit-message:
     default: 'Automated commit by GitHub Actions'
     description: Commit message for the changes
     required: false
-  remote_ref:
+  remote-ref:
     default: 'origin'
     description: Remote repository reference
     required: false
-  branch_target:
+  branch-target:
     default: 'main'
     description: Name of the branch to push the code into
     required: false
-  create_branch:
+  create-branch:
     default: 'false'
     description: Create branch if it does not exist
     required: false
-  directory_path:
+  directory-path:
     default: '.'
     description: Path to the directory containing files to commit and push
     required: false
-  force_push:
+  force-push:
     default: 'false'
     description: Whether to force push (true/false)
     required: false
 
 outputs:
-  commit_hash:
+  commit-hash:
     description: The hash of the latest commit
 
 runs:

@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { ExitCode } from '@actions/core';
-import { GitCommand, ICommitAndPush, Input } from '../types.js';
+import { GitCommand, ICommitAndPush, Input, Output } from '../types.js';
 import { execCommand, isExecOutputSuccess } from './git.js';
 import { isError, isTrue } from './guards.js';
 import { ensureQuoted } from './common.js';
@@ -123,7 +123,7 @@ export abstract class BaseAction implements ICommitAndPush {
       throw new Error(message);
     }
 
-    core.setOutput('commit_hash', getCommitHashResult.stdout);
+    core.setOutput(Output.COMMIT_HASH, getCommitHashResult.stdout);
     return core.ExitCode.Success;
   }
 }

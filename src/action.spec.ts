@@ -16,17 +16,17 @@ describe('Action', () => {
   let isExecOutputSuccessMock: jest.Mock;
 
   const mockInputs: Record<Input, string> = {
-    author_email: 'jedi@example.com',
-    author_name: 'Captain Picard',
-    branch_target: 'main', // target branch for the commit
-    commit_message: 'You shall not pass!',
-    create_branch: 'false',
-    directory_path: '/path/to/mordor',
-    force_push: 'true', // push it, push it real good <3 S&P
-    github_hostname: 'github.com',
-    github_token: 'my-precious',
-    remote_ref: 'origin',
-    sign_commit: 'true' // interpreter's fingers going to be sore from base 64
+    [Input.AUTHOR_EMAIL]: 'jedi@example.com',
+    [Input.AUTHOR_NAME]: 'Captain Picard',
+    [Input.BRANCH_TARGET]: 'main', // target branch for the commit
+    [Input.COMMIT_MESSAGE]: 'You shall not pass!',
+    [Input.CREATE_BRANCH]: 'false',
+    [Input.DIRECTORY_PATH]: '/path/to/mordor',
+    [Input.FORCE_PUSH]: 'true', // push it, push it real good <3 S&P
+    [Input.GITHUB_HOSTNAME]: 'github.com',
+    [Input.GITHUB_TOKEN]: 'my-precious',
+    [Input.REMOTE_REF]: 'origin',
+    [Input.SIGN_COMMIT]: 'true' // interpreter's fingers going to be sore from base 64
   };
 
   beforeEach(() => {
@@ -155,7 +155,7 @@ describe('Action', () => {
       expect(setOutputSpy).toHaveBeenCalledTimes(1);
       expect(setOutputSpy).toHaveBeenNthCalledWith(
         1,
-        'commit_hash',
+        'commit-hash',
         '1234567890'
       );
     });
