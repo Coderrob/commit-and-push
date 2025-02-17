@@ -1,0 +1,97 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'badges/**'
+      - '*.md'
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.job }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
+  statuses: write
+
+jobs:
+  lint-check:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install Dependencies
+        id: install-dependencies
+        run: npm ci
+
+      - name: Style Check
+        id: style-check
+        run: npm run format:check
+
+      - name: Lint Check
+        id: lint-check
+        run: npm run lint
+
+      - name: Lint Codebase
+        id: super-linter
+        uses: super-linter/super-linter/slim@v7
+        env:
+          DEFAULT_BRANCH: main
+          FILTER_REGEX_EXCLUDE: dist/**/*
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINTER_RULES_PATH: ${{ github.workspace }}
+          VALIDATE_ALL_CODEBASE: true
+          VALIDATE_JAVASCRIPT_ES: false
+          VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_JSCPD: false
+          VALIDATE_JSON: false
+          VALIDATE_SHELL_SHFMT: false
+          VALIDATE_TYPESCRIPT_ES: false
+          VALIDATE_TYPESCRIPT_STANDARD: false
+
+  unit-test:
+    needs: lint-check
+    name: Unit Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install Dependencies
+        id: install-dependencies
+        run: npm ci
+
+      - name: Unit Tests
+        id: unit-test
+        run: npm run test

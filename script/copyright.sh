@@ -76,7 +76,7 @@ format_copyright_notice() {
         return 1
     fi
 
-    echo "$COPYRIGHT_NOTICE" | sed "s/^/$style /"
+    echo -e "${COPYRIGHT_NOTICE//^/$style}" | sed 's/^/$/'
 }
 
 # Function to prepend the copyright notice to a file
