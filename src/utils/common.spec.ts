@@ -15,7 +15,7 @@
  *
  */
 
-import { ensureQuoted } from './common.js';
+import { ensureQuoted, sanitizeInput } from './common.js';
 
 describe('Common', () => {
   describe('ensureQuoted', () => {
@@ -32,6 +32,35 @@ describe('Common', () => {
       ['hello\nworld', '"hello\nworld"']
     ])('should ensure that %s is quoted as %s', (input, expected) =>
       expect(ensureQuoted(input)).toBe(expected)
+    );
+  });
+
+  describe('sanitizeInput', () => {
+    test('should throw an error for non-string input', () => {
+      expect(() => sanitizeInput(123 as unknown as string)).toThrow(
+        'Invalid input type'
+      );
+    });
+
+    test('should return the input if it is a string and does not contain disallowed patterns', () => {
+      const validInput = 'valid-input';
+      expect(sanitizeInput(validInput)).toEqual(validInput);
+    });
+
+    it.each([
+      ['./../../bad/actor', /\.\./g],
+      ['some\rinput', /[\r\n]/g],
+      ['some\ninput', /[\r\n]/g],
+      ['some;extra', /[;&|]/g],
+      ['some; | extra', /[;&|]/g],
+      ['some `changes not allowed`', /`/g],
+      ['some $extra', /\$/g]
+    ])(
+      'should throw an error if the input %s contains disallowed patterns %s',
+      (input) =>
+        expect(() => sanitizeInput(input)).toThrow(
+          `Security risk detected in input: ${input}`
+        )
     );
   });
 });

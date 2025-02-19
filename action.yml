@@ -23,14 +23,37 @@ branding:
   icon: 'git-commit'
 
 inputs:
-  github-token:
-    default: ${{ github.token }}
-    description:
-      GitHub token used for authentication (must have minimal required scopes)
-    required: false
   github-hostname:
     default: 'github.com'
-    description: GitHub hostname (useful for enterprise installations)
+    description: GitHub hostname to support GitHub Enterprise installations.
+    required: false
+  github-token:
+    default: ${{ github.token }}
+    description: GitHub token used for authentication
+    required: false
+  repository:
+    default: ${{ github.repository }}
+    description: GitHub repository in the format owner/repo
+    required: false
+  remote-ref:
+    default: 'origin'
+    description: Remote repository reference
+    required: false
+  fetch-latest:
+    default: 'false'
+    description: Whether to fetch latest before committing changes
+    required: false
+  branch:
+    default: ${{ github.ref_name }}
+    description: Name of the branch to push the code into
+    required: true
+  create-branch:
+    default: 'false'
+    description: Create branch if it does not exist
+    required: false
+  directory-path:
+    default: '.'
+    description: Path to the directory containing files to commit and push
     required: false
   author-name:
     default: 'GitHub Actions'
@@ -48,27 +71,14 @@ inputs:
     default: 'Automated commit by GitHub Actions'
     description: Commit message for the changes
     required: false
-  remote-ref:
-    default: 'origin'
-    description: Remote repository reference
-    required: false
-  branch-target:
-    default: 'main'
-    description: Name of the branch to push the code into
-    required: false
-  create-branch:
-    default: 'false'
-    description: Create branch if it does not exist
-    required: false
-  directory-path:
-    default: '.'
-    description: Path to the directory containing files to commit and push
-    required: false
   force-push:
     default: 'false'
     description: Whether to force push (true/false)
     required: false
-
+  open-pull-request:
+    default: 'false'
+    description: Whether to open pull request (true/false)
+    required: false
 outputs:
   commit-hash:
     description: The hash of the latest commit

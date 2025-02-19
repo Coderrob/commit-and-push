@@ -5,7 +5,8 @@
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@actions/exec": "^1.1.1"
+    "@actions/exec": "^1.1.1",
+    "@actions/http-client": "^2.2.3"
   },
   "description": "A GitHub Action to commit and push changes to a repository.",
   "devDependencies": {

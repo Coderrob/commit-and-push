@@ -21,7 +21,7 @@ import { Input, InputEntry } from './types.js';
 export const actionInputs: Record<Input, InputEntry> = {
   [Input.AUTHOR_EMAIL]: {
     id: Input.AUTHOR_EMAIL,
-    default: 'github-actions@example.com',
+    default: 'github-actions@noreply.github.com',
     deprecationMessage: '',
     description: 'The author email to use for the commit',
     required: false
@@ -29,14 +29,14 @@ export const actionInputs: Record<Input, InputEntry> = {
   [Input.AUTHOR_NAME]: {
     id: Input.AUTHOR_NAME,
     description: 'The author name to use for the commit',
-    default: 'commit-and-push',
+    default: 'GitHub Actions',
     required: false,
     deprecationMessage: ''
   },
-  [Input.BRANCH_TARGET]: {
-    id: Input.BRANCH_TARGET,
+  [Input.BRANCH]: {
+    id: Input.BRANCH,
     description: 'The branch target to push the commit to',
-    default: 'main',
+    default: '${{ github.ref_name }}',
     required: false,
     deprecationMessage: ''
   },
@@ -56,7 +56,7 @@ export const actionInputs: Record<Input, InputEntry> = {
   },
   [Input.DIRECTORY_PATH]: {
     id: Input.DIRECTORY_PATH,
-    description: 'The directory path to use for the commit',
+    description: 'The directory path to use for adding changes to the commit',
     default: '.',
     required: false,
     deprecationMessage: ''
@@ -79,8 +79,15 @@ export const actionInputs: Record<Input, InputEntry> = {
   [Input.GITHUB_TOKEN]: {
     id: Input.GITHUB_TOKEN,
     description: 'The GitHub token to use for authentication',
-    default: 'github-token',
+    default: '${{ github.token }}',
     required: true,
+    deprecationMessage: ''
+  },
+  [Input.REPOSITORY]: {
+    id: Input.REPOSITORY,
+    description: 'The GitHub repository to use for the commit',
+    default: '${{ github.repository }}',
+    required: false,
     deprecationMessage: ''
   },
   [Input.REMOTE_REF]: {
