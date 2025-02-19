@@ -18,19 +18,45 @@
 export enum Input {
   AUTHOR_EMAIL = 'author-email',
   AUTHOR_NAME = 'author-name',
-  BRANCH_TARGET = 'branch-target',
+  BRANCH = 'branch',
   COMMIT_MESSAGE = 'commit-message',
   CREATE_BRANCH = 'create-branch',
   DIRECTORY_PATH = 'directory-path',
+  FETCH_LATEST = 'fetch-latest',
   FORCE_PUSH = 'force-push',
   GITHUB_HOSTNAME = 'github-hostname',
   GITHUB_TOKEN = 'github-token',
+  OPEN_PULL_REQUEST = 'open-pull-request',
   REMOTE_REF = 'remote-ref',
+  REPOSITORY = 'repository',
   SIGN_COMMIT = 'sign-commit'
 }
 
 export enum Output {
   COMMIT_HASH = 'commit-hash'
+}
+
+export interface GitHubParams {
+  readonly baseUrl: string;
+  readonly token: string;
+  readonly owner: string;
+  readonly repo: string;
+}
+
+export interface GitWorkflowParams {
+  readonly authorEmail: string;
+  readonly authorName: string;
+  readonly branch: string;
+  readonly commitMessage: string;
+  readonly createBranch: boolean;
+  readonly directoryPath: string;
+  readonly fetchLatest: boolean;
+  readonly forcePush: boolean;
+  readonly githubToken: string;
+  readonly openPullRequest: boolean;
+  readonly remoteRef: string;
+  readonly repository: string;
+  readonly signCommit: boolean;
 }
 
 export enum GitCommand {
@@ -79,13 +105,17 @@ export interface IExecute {
   execute(): Promise<void>;
 }
 
-export interface ICommitAndPush {
-  updateConfig(): Promise<number>;
+export interface IGit {
+  updateConfig(
+    userName: string,
+    userEmail: string,
+    signCommit?: boolean
+  ): Promise<number>;
   fetchLatest(): Promise<number>;
-  checkoutBranch(): Promise<number>;
-  stageChanges(): Promise<number>;
-  commitChanges(): Promise<number>;
-  pushChanges(): Promise<number>;
+  checkoutBranch(branch: string, createNew?: boolean): Promise<number>;
+  stageChanges(directoryPath: string): Promise<number>;
+  commitChanges(message: string, signCommit?: boolean): Promise<number>;
+  pushChanges(remote: string, branch: string, force?: boolean): Promise<number>;
 }
 
 /**

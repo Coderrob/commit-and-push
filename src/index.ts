@@ -1,5 +1,4 @@
 /*
- *
  * Copyright 2025 Robert Lindley
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,21 +16,24 @@
  */
 
 import { Action } from './action.js';
-import { Input } from './types.js';
 import { getInputValue } from './inputs.js';
+import { Input } from './types.js';
 
 (async () => {
   await new Action({
     [Input.AUTHOR_EMAIL]: getInputValue[Input.AUTHOR_EMAIL],
     [Input.AUTHOR_NAME]: getInputValue[Input.AUTHOR_NAME],
-    [Input.BRANCH_TARGET]: getInputValue[Input.BRANCH_TARGET],
+    [Input.BRANCH]: getInputValue[Input.BRANCH],
     [Input.COMMIT_MESSAGE]: getInputValue[Input.COMMIT_MESSAGE],
     [Input.CREATE_BRANCH]: getInputValue[Input.CREATE_BRANCH],
     [Input.DIRECTORY_PATH]: getInputValue[Input.DIRECTORY_PATH],
+    [Input.FETCH_LATEST]: getInputValue[Input.FETCH_LATEST],
     [Input.FORCE_PUSH]: getInputValue[Input.FORCE_PUSH],
     [Input.GITHUB_HOSTNAME]: getInputValue[Input.GITHUB_HOSTNAME],
     [Input.GITHUB_TOKEN]: getInputValue[Input.GITHUB_TOKEN],
+    [Input.OPEN_PULL_REQUEST]: getInputValue[Input.OPEN_PULL_REQUEST],
     [Input.REMOTE_REF]: getInputValue[Input.REMOTE_REF],
+    [Input.REPOSITORY]: getInputValue[Input.REPOSITORY],
     [Input.SIGN_COMMIT]: getInputValue[Input.SIGN_COMMIT]
   }).execute();
 })();

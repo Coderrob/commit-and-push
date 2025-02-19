@@ -16,187 +16,97 @@
  */
 
 import * as core from '@actions/core';
-import { Action } from './action.js';
-import { execCommand, isExecOutputSuccess } from './utils/git.js';
-import { Input } from './types.js';
 
-jest.mock('./utils/git.js', () => ({
-  execCommand: jest.fn(),
-  isExecOutputSuccess: jest.fn()
-}));
+import { Action } from './action.js';
+import { Input } from './types.js';
 
 describe('Action', () => {
   let infoSpy: jest.SpyInstance;
-  let setOutputSpy: jest.SpyInstance;
+
   let setFailedSpy: jest.SpyInstance;
-  let execCommandMock: jest.Mock;
-  let isExecOutputSuccessMock: jest.Mock;
 
   const mockInputs: Record<Input, string> = {
     [Input.AUTHOR_EMAIL]: 'jedi@example.com',
     [Input.AUTHOR_NAME]: 'Captain Picard',
-    [Input.BRANCH_TARGET]: 'main', // target branch for the commit
+    [Input.BRANCH]: 'test',
     [Input.COMMIT_MESSAGE]: 'You shall not pass!',
-    [Input.CREATE_BRANCH]: 'false',
-    [Input.DIRECTORY_PATH]: '/path/to/mordor',
-    [Input.FORCE_PUSH]: 'true', // push it, push it real good <3 S&P
+    [Input.CREATE_BRANCH]: 'true',
+    [Input.DIRECTORY_PATH]: './path/to/mordor',
+    [Input.FETCH_LATEST]: 'true',
+    [Input.FORCE_PUSH]: 'true',
     [Input.GITHUB_HOSTNAME]: 'github.com',
     [Input.GITHUB_TOKEN]: 'my-precious',
+    [Input.OPEN_PULL_REQUEST]: 'false',
     [Input.REMOTE_REF]: 'origin',
-    [Input.SIGN_COMMIT]: 'true' // interpreter's fingers going to be sore from base 64
+    [Input.REPOSITORY]: 'org/repo',
+    [Input.SIGN_COMMIT]: 'true'
   };
 
   beforeEach(() => {
-    execCommandMock = execCommand as jest.Mock;
-    isExecOutputSuccessMock = isExecOutputSuccess as jest.Mock;
     infoSpy = jest.spyOn(core, 'info');
-    setOutputSpy = jest.spyOn(core, 'setOutput');
     setFailedSpy = jest.spyOn(core, 'setFailed');
   });
 
   afterEach(jest.clearAllMocks);
 
-  describe('updateConfig', () => {
-    it('should update git config with provided inputs and return 0 if successful', async () => {
-      execCommandMock
-        .mockResolvedValueOnce({ exitCode: 0 })
-        .mockResolvedValueOnce({ exitCode: 0 })
-        .mockResolvedValueOnce({ exitCode: 0 });
-      const exitCode = await new Action(mockInputs).updateConfig();
-      expect(exitCode).toEqual(0);
-      expect(execCommandMock).toHaveBeenCalledTimes(3);
-      expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['--global', 'user.name', '"Captain Picard"'],
-        command: 'config'
-      });
-      expect(execCommandMock).toHaveBeenNthCalledWith(2, {
-        args: ['--global', 'user.email', '"jedi@example.com"'],
-        command: 'config'
-      });
-      expect(execCommandMock).toHaveBeenNthCalledWith(3, {
-        args: ['--global', 'commit.gpgsign', 'true'],
-        command: 'config'
-      });
-    });
-  });
-
-  describe('fetchLatest', () => {
-    it('should fetch the latest changes from the remote repository', async () => {
-      execCommandMock.mockResolvedValueOnce({ exitCode: 0 });
-      const exitCode = await new Action(mockInputs).fetchLatest();
-      expect(exitCode).toEqual(0);
-      expect(execCommandMock).toHaveBeenCalledTimes(1);
-      expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['--all'],
-        command: 'fetch'
-      });
-    });
-  });
-
-  describe('checkoutBranch', () => {
-    it('should checkout a specific branch', async () => {
-      execCommandMock.mockResolvedValueOnce({ exitCode: 0 });
-      const exitCode = await new Action(mockInputs).checkoutBranch();
-      expect(exitCode).toEqual(0);
-      expect(execCommandMock).toHaveBeenCalledTimes(1);
-      expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['main'],
-        command: 'checkout'
-      });
-    });
-
-    it('should checkout a new branch', async () => {
-      execCommandMock.mockResolvedValueOnce({ exitCode: 0 });
-      const checkoutNewBranchInput = {
-        ...mockInputs,
-        [Input.CREATE_BRANCH]: 'true'
-      };
-      const exitCode = await new Action(
-        checkoutNewBranchInput
-      ).checkoutBranch();
-      expect(exitCode).toEqual(0);
-      expect(execCommandMock).toHaveBeenCalledTimes(1);
-      expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['-b', 'main'],
-        command: 'checkout'
-      });
-    });
-  });
-
-  describe('stageChanges', () => {
-    it('should stage changes in the specified directory', async () => {
-      execCommandMock.mockResolvedValueOnce({ exitCode: 0 });
-      const exitCode = await new Action(mockInputs).stageChanges();
-      expect(exitCode).toEqual(0);
-      expect(execCommandMock).toHaveBeenCalledTimes(1);
-      expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['"/path/to/mordor"'],
-        command: 'add'
-      });
-    });
-  });
-
-  describe('commitChanges', () => {
-    it('should commit changes with the specified message and sign them if required', async () => {
-      execCommandMock.mockResolvedValueOnce({ exitCode: 0 });
-      const exitCode = await new Action(mockInputs).commitChanges();
-      expect(exitCode).toEqual(0);
-      expect(execCommandMock).toHaveBeenCalledTimes(1);
-      expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['-S', '-m', '"You shall not pass!"'],
-        command: 'commit'
-      });
-    });
-  });
-
-  describe('pushChanges', () => {
-    it('should push changes to the specified remote and branch with force if required', async () => {
-      execCommandMock
-        .mockResolvedValueOnce({ exitCode: 0 })
-        .mockResolvedValueOnce({ exitCode: 0, stdout: '1234567890' });
-      isExecOutputSuccessMock
-        .mockReturnValueOnce(true)
-        .mockReturnValueOnce(true);
-      const exitCode = await new Action(mockInputs).pushChanges();
-      expect(exitCode).toEqual(0);
-      expect(execCommandMock).toHaveBeenCalledTimes(2);
-      expect(execCommandMock).toHaveBeenNthCalledWith(1, {
-        args: ['origin', 'main', '--force'],
-        command: 'push'
-      });
-      expect(execCommandMock).toHaveBeenNthCalledWith(2, {
-        args: ['HEAD'],
-        command: 'rev-parse'
-      });
-      expect(infoSpy).toHaveBeenCalledTimes(0);
-      expect(setOutputSpy).toHaveBeenCalledTimes(1);
-      expect(setOutputSpy).toHaveBeenNthCalledWith(
-        1,
-        'commit-hash',
-        '1234567890'
-      );
-    });
-  });
-
   describe('execute', () => {
-    it('should execute all steps', async () => {
-      const action = new Action(mockInputs);
+    let action: Action;
+    let updateConfigSpy: jest.SpyInstance;
+    let fetchLatestSpy: jest.SpyInstance;
+    let checkoutBranchSpy: jest.SpyInstance;
+    let stageChangesSpy: jest.SpyInstance;
+    let commitChangesSpy: jest.SpyInstance;
+    let pushChangesSpy: jest.SpyInstance;
 
-      jest.spyOn(action, 'updateConfig').mockReturnValue(Promise.resolve(0));
-      jest.spyOn(action, 'fetchLatest').mockReturnValue(Promise.resolve(0));
-      jest.spyOn(action, 'checkoutBranch').mockReturnValue(Promise.resolve(0));
-      jest.spyOn(action, 'stageChanges').mockReturnValue(Promise.resolve(0));
-      jest.spyOn(action, 'commitChanges').mockReturnValue(Promise.resolve(0));
-      jest.spyOn(action, 'pushChanges').mockReturnValue(Promise.resolve(0));
+    beforeEach(() => {
+      action = new Action(mockInputs);
+      updateConfigSpy = jest.spyOn(action['git'], 'updateConfig');
+      fetchLatestSpy = jest.spyOn(action['git'], 'fetchLatest');
+      checkoutBranchSpy = jest.spyOn(action['git'], 'checkoutBranch');
+      stageChangesSpy = jest.spyOn(action['git'], 'stageChanges');
+      commitChangesSpy = jest.spyOn(action['git'], 'commitChanges');
+      pushChangesSpy = jest.spyOn(action['git'], 'pushChanges');
+    });
+
+    it('should execute all steps', async () => {
+      updateConfigSpy.mockReturnValue(Promise.resolve(0));
+      fetchLatestSpy.mockReturnValue(Promise.resolve(0));
+      checkoutBranchSpy.mockReturnValue(Promise.resolve(0));
+      stageChangesSpy.mockReturnValue(Promise.resolve(0));
+      commitChangesSpy.mockReturnValue(Promise.resolve(0));
+      pushChangesSpy.mockReturnValue(Promise.resolve(0));
 
       await action.execute();
 
-      expect(infoSpy).toHaveBeenCalledTimes(1);
-      expect(infoSpy).toHaveBeenNthCalledWith(
-        1,
-        'Changes pushed successfully!'
-      );
+      expect(infoSpy).toHaveBeenCalledTimes(6);
+      expect(infoSpy).toHaveBeenNthCalledWith(1, 'Updating config...');
+      expect(infoSpy).toHaveBeenNthCalledWith(2, 'Fetching latest...');
+      expect(infoSpy).toHaveBeenNthCalledWith(3, 'Checking out branch...');
+      expect(infoSpy).toHaveBeenNthCalledWith(4, 'Staging changes...');
+      expect(infoSpy).toHaveBeenNthCalledWith(5, 'Committing changes...');
+      expect(infoSpy).toHaveBeenNthCalledWith(6, 'Pushing changes...');
       expect(setFailedSpy).not.toHaveBeenCalled();
+      expect(updateConfigSpy).toHaveBeenCalledTimes(1);
+      expect(updateConfigSpy).toHaveBeenNthCalledWith(
+        1,
+        'Captain Picard',
+        'jedi@example.com',
+        true
+      );
+      expect(fetchLatestSpy).toHaveBeenCalledTimes(1);
+      expect(fetchLatestSpy).toHaveBeenNthCalledWith(1);
+      expect(checkoutBranchSpy).toHaveBeenCalledTimes(1);
+      expect(checkoutBranchSpy).toHaveBeenNthCalledWith(1, 'test', true);
+      expect(stageChangesSpy).toHaveBeenCalledTimes(1);
+      expect(stageChangesSpy).toHaveBeenNthCalledWith(1, './path/to/mordor');
+      expect(commitChangesSpy).toHaveBeenCalledTimes(1);
+      expect(commitChangesSpy).toHaveBeenNthCalledWith(
+        1,
+        'You shall not pass!',
+        true
+      );
+      expect(pushChangesSpy).toHaveBeenCalledTimes(1);
+      expect(pushChangesSpy).toHaveBeenNthCalledWith(1, 'origin', 'test', true);
     });
   });
 });
