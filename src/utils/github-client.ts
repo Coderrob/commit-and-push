@@ -15,6 +15,7 @@
  */
 
 import * as http from '@actions/http-client';
+
 import { GitHubParams } from '../types.js';
 
 const USER_AGENT = 'github-action';

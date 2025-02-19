@@ -17,6 +17,7 @@
 
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+
 import { ALLOWED_COMMANDS, DISALLOWED_PATTERNS, ICommand } from '../types.js';
 import { isError, isString } from './guards.js';
 

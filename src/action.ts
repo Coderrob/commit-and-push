@@ -16,10 +16,11 @@
  */
 
 import * as core from '@actions/core';
-import { Git } from './utils/git.js';
+
 import { GitWorkflowParams, IExecute, Input } from './types.js';
-import { isError, isTrue } from './utils/guards.js';
+import { Git } from './utils/git.js';
 import { GitHubClient } from './utils/github-client.js';
+import { isError, isTrue } from './utils/guards.js';
 
 export class Action implements IExecute {
   private readonly git: Git;
@@ -60,7 +61,7 @@ export class Action implements IExecute {
     };
     this.git = new Git();
     this.gitHub = new GitHubClient({
-      baseUrl: `https://api.${githubHostname}.com`,
+      baseUrl: `https://api.${githubHostname}`,
       token: githubToken,
       owner,
       repo
@@ -69,7 +70,7 @@ export class Action implements IExecute {
 
   async execute(): Promise<void> {
     try {
-      core.info('Setting Git config...');
+      core.info('Updating config...');
       await this.git.updateConfig(
         this.params.authorName,
         this.params.authorEmail,
@@ -87,7 +88,7 @@ export class Action implements IExecute {
         this.params.createBranch
       );
 
-      core.info('Adding files to commit...');
+      core.info('Staging changes...');
       await this.git.stageChanges(this.params.directoryPath);
 
       core.info('Committing changes...');
@@ -105,7 +106,10 @@ export class Action implements IExecute {
 
       if (this.params.openPullRequest) {
         core.info('Opening pull request...');
-        await this.gitHub.createPullRequest('', '', '');
+        await this.gitHub.createPullRequest(
+          this.params.branch,
+          this.params.branch
+        );
       }
     } catch (error) {
       const message = isError(error) ? error.message : 'Unknown error';

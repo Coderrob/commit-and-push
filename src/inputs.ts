@@ -16,6 +16,7 @@
  */
 
 import * as core from '@actions/core';
+
 import { Input, InputEntry } from './types.js';
 
 export const actionInputs: Record<Input, InputEntry> = {
@@ -61,6 +62,14 @@ export const actionInputs: Record<Input, InputEntry> = {
     required: false,
     deprecationMessage: ''
   },
+  [Input.FETCH_LATEST]: {
+    id: Input.FETCH_LATEST,
+    description:
+      'Whether to fetch the latest changes from the remote repository before pushing the commit',
+    default: 'false',
+    required: false,
+    deprecationMessage: ''
+  },
   [Input.FORCE_PUSH]: {
     id: Input.FORCE_PUSH,
     description: 'Whether to force push the commit',
@@ -81,6 +90,13 @@ export const actionInputs: Record<Input, InputEntry> = {
     description: 'The GitHub token to use for authentication',
     default: '${{ github.token }}',
     required: true,
+    deprecationMessage: ''
+  },
+  [Input.OPEN_PULL_REQUEST]: {
+    id: Input.OPEN_PULL_REQUEST,
+    description: 'Whether to open a pull request after pushing the commit',
+    default: 'false',
+    required: false,
     deprecationMessage: ''
   },
   [Input.REPOSITORY]: {

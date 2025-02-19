@@ -15,74 +15,181 @@
  *
  */
 
-import * as core from '@actions/core';
-import * as exec from '@actions/exec';
-import { GitCommand } from '../types.js';
-import { execCommand } from './common.js';
+import * as common from './common.js';
+import { Git } from './git.js';
 
-describe('git', () => {
-  let mockInfo: jest.SpyInstance;
-  let getExecOutput: jest.SpyInstance;
+describe('Git', () => {
+  let git: Git;
+  let execCommandSpy: jest.SpyInstance;
+  let isExecOutputSuccessSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    getExecOutput = jest.spyOn(exec, 'getExecOutput');
-    mockInfo = jest.spyOn(core, 'info');
+    isExecOutputSuccessSpy = jest.spyOn(common, 'isExecOutputSuccess');
+    execCommandSpy = jest.spyOn(common, 'execCommand');
+    git = new Git();
   });
 
   afterEach(jest.clearAllMocks);
 
-  describe('executeGitCommand', () => {
-    test('should throw an error for unauthorized Git command', async () => {
-      await expect(() =>
-        execCommand({
-          command: 'unknown-command' as unknown as GitCommand
-        })
-      ).rejects.toThrow(`Unauthorized Git command: unknown-command`);
-      expect(getExecOutput).toHaveBeenCalledTimes(0);
-      expect(mockInfo).toHaveBeenCalledTimes(0);
+  describe('updateConfig', () => {
+    it('should update git config with name, email, and to sign commits', async () => {
+      execCommandSpy
+        .mockResolvedValueOnce({ exitCode: 0 })
+        .mockResolvedValueOnce({ exitCode: 0 })
+        .mockResolvedValueOnce({ exitCode: 0 });
+      const exitCode = await git.updateConfig(
+        'Captain Picard',
+        'jedi@example.com',
+        true
+      );
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(3);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['--global', 'user.name', '"Captain Picard"'],
+        command: 'config'
+      });
+      expect(execCommandSpy).toHaveBeenNthCalledWith(2, {
+        args: ['--global', 'user.email', '"jedi@example.com"'],
+        command: 'config'
+      });
+      expect(execCommandSpy).toHaveBeenNthCalledWith(3, {
+        args: ['--global', 'commit.gpgsign', 'true'],
+        command: 'config'
+      });
     });
 
-    test('should throw an error for getExecOutput failure', async () => {
-      getExecOutput.mockRejectedValueOnce(new Error('Overdue electric bill'));
-      await expect(() =>
-        execCommand({ command: GitCommand.PUSH })
-      ).rejects.toThrow(`Git command failed: Overdue electric bill`);
-      expect(getExecOutput).toHaveBeenCalledTimes(1);
-      expect(mockInfo).toHaveBeenCalledTimes(0);
+    it('should update git config with name and email', async () => {
+      execCommandSpy
+        .mockResolvedValueOnce({ exitCode: 0 })
+        .mockResolvedValueOnce({ exitCode: 0 })
+        .mockResolvedValueOnce({ exitCode: 0 });
+      const exitCode = await git.updateConfig(
+        'Captain Picard',
+        'jedi@example.com',
+        false
+      );
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(2);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['--global', 'user.name', '"Captain Picard"'],
+        command: 'config'
+      });
+      expect(execCommandSpy).toHaveBeenNthCalledWith(2, {
+        args: ['--global', 'user.email', '"jedi@example.com"'],
+        command: 'config'
+      });
+    });
+  });
+
+  describe('fetchLatest', () => {
+    it('should fetch the latest changes from the remote repository', async () => {
+      execCommandSpy.mockResolvedValueOnce({ exitCode: 0 });
+      const exitCode = await git.fetchLatest();
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(1);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['--all'],
+        command: 'fetch'
+      });
+    });
+  });
+
+  describe('checkoutBranch', () => {
+    it('should checkout a specific branch', async () => {
+      execCommandSpy.mockResolvedValueOnce({ exitCode: 0 });
+      const exitCode = await git.checkoutBranch('main', false);
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(1);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['main'],
+        command: 'checkout'
+      });
     });
 
-    test('should execute a valid Git command and return the successful exit code', async () => {
-      getExecOutput.mockResolvedValueOnce({ stdout: 'some output' });
-      const result = await execCommand({
-        command: GitCommand.STATUS,
-        args: []
+    it('should checkout a new branch', async () => {
+      execCommandSpy.mockResolvedValueOnce({ exitCode: 0 });
+      const exitCode = await git.checkoutBranch('main', true);
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(1);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['-b', 'main'],
+        command: 'checkout'
       });
-      expect(result).toEqual({
-        exitCode: undefined,
-        stderr: undefined,
-        stdout: 'some output'
+    });
+  });
+
+  describe('stageChanges', () => {
+    it('should stage changes in the specified directory', async () => {
+      execCommandSpy.mockResolvedValueOnce({ exitCode: 0 });
+      const exitCode = await git.stageChanges('/path/to/mordor');
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(1);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['"/path/to/mordor"'],
+        command: 'add'
       });
-      expect(getExecOutput).toHaveBeenCalledWith('git status');
-      expect(mockInfo).toHaveBeenCalledTimes(2);
-      expect(mockInfo).toHaveBeenNthCalledWith(1, 'Git output: some output');
-      expect(mockInfo).toHaveBeenNthCalledWith(2, 'Git errors: undefined');
+    });
+  });
+
+  describe('commitChanges', () => {
+    it('should commit changes with the specified message and sign them if required', async () => {
+      execCommandSpy.mockResolvedValueOnce({ exitCode: 0 });
+      const exitCode = await git.commitChanges('You shall not pass!', true);
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(1);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['-S', '-m', '"You shall not pass!"'],
+        command: 'commit'
+      });
     });
 
-    test('should return a non-zero failure exit code if the execSync call returns errors', async () => {
-      getExecOutput.mockResolvedValueOnce({ stderr: 'some output' });
-      const result = await execCommand({
-        command: GitCommand.STATUS,
-        args: []
+    it('should commit changes with the specified message', async () => {
+      execCommandSpy.mockResolvedValueOnce({ exitCode: 0 });
+      const exitCode = await git.commitChanges('You shall not pass!');
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(1);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['-m', '"You shall not pass!"'],
+        command: 'commit'
       });
-      expect(result).toEqual({
-        exitCode: undefined,
-        stderr: 'some output',
-        stdout: undefined
+    });
+  });
+
+  describe('pushChanges', () => {
+    it('should push changes to the specified remote and branch with force push', async () => {
+      execCommandSpy
+        .mockResolvedValueOnce({ exitCode: 0 })
+        .mockResolvedValueOnce({ exitCode: 0, stdout: '1234567890' });
+      isExecOutputSuccessSpy.mockResolvedValueOnce(true);
+      const exitCode = await git.pushChanges('origin', 'main', true);
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(2);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['origin', 'main', '--force'],
+        command: 'push'
       });
-      expect(getExecOutput).toHaveBeenCalledWith('git status');
-      expect(mockInfo).toHaveBeenCalledTimes(2);
-      expect(mockInfo).toHaveBeenNthCalledWith(1, 'Git output: undefined');
-      expect(mockInfo).toHaveBeenNthCalledWith(2, 'Git errors: some output');
+      expect(execCommandSpy).toHaveBeenNthCalledWith(2, {
+        args: ['HEAD'],
+        command: 'rev-parse'
+      });
+    });
+
+    it('should push changes to the specified remote and branch', async () => {
+      execCommandSpy
+        .mockResolvedValueOnce({ exitCode: 0 })
+        .mockResolvedValueOnce({ exitCode: 0, stdout: '1234567890' });
+      isExecOutputSuccessSpy.mockResolvedValueOnce(true);
+      const exitCode = await git.pushChanges('origin', 'main');
+      expect(exitCode).toEqual(0);
+      expect(execCommandSpy).toHaveBeenCalledTimes(2);
+      expect(execCommandSpy).toHaveBeenNthCalledWith(1, {
+        args: ['origin', 'main'],
+        command: 'push'
+      });
+      expect(execCommandSpy).toHaveBeenNthCalledWith(2, {
+        args: ['HEAD'],
+        command: 'rev-parse'
+      });
     });
   });
 });
