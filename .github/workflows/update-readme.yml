@@ -40,7 +40,7 @@ jobs:
 
       - name: Commit and Push README changes
         id: commit-and-push-readme
-        uses: coderrob/commit-and-push@main
+        uses: coderrob/commit-and-push@remove-octokit-and-use-http
         with:
-          branch-target: main
+          branch: remove-octokit-and-use-http
           directory-path: './README.md'
