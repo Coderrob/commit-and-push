@@ -2,7 +2,7 @@ name: Update README
 
 on:
   workflow_dispatch: {}
-  push:
+  pull_request:
     branches:
       - main
     paths:
@@ -42,5 +42,5 @@ jobs:
         id: commit-and-push-readme
         uses: coderrob/commit-and-push@remove-octokit-and-use-http
         with:
-          branch: remove-octokit-and-use-http
+          branch: ${{ github.ref_name }}
           directory-path: './README.md'

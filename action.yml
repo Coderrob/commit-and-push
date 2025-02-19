@@ -46,7 +46,7 @@ inputs:
   branch:
     default: ${{ github.ref_name }}
     description: Name of the branch to push the code into
-    required: true
+    required: false
   create-branch:
     default: 'false'
     description: Create branch if it does not exist
