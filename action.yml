@@ -33,7 +33,7 @@ inputs:
     required: false
   repository:
     default: ${{ github.repository }}
-    description: GitHub repository in the format owner/repo
+    description: GitHub repository in the format owner/repository
     required: false
   remote-ref:
     default: 'origin'
