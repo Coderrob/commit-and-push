@@ -33,14 +33,14 @@ jobs:
 
       - name: Update README
         id: update-readme
-        uses: coderrob/update-action-readme@main
+        uses: coderrob/update-action-readme@v1
         with:
           action-file-path: ./action.yml
           readme-file-path: ./README.md
 
       - name: Commit and Push README changes
         id: commit-and-push-readme
-        uses: coderrob/commit-and-push@remove-octokit-and-use-http
+        uses: coderrob/commit-and-push@main
         with:
           branch: ${{ github.ref_name }}
           directory-path: './README.md'
