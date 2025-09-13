@@ -6,11 +6,11 @@
     "declarationMap": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "inlineSourceMap": true,
-    "inlineSources": true,
+    "inlineSourceMap": false,
+    "inlineSources": false,
     "lib": ["ES2022"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "newLine": "lf",
     "noImplicitAny": true,
     "noUnusedLocals": true,
@@ -18,19 +18,14 @@
     "outDir": "./dist",
     "pretty": true,
     "resolveJsonModule": true,
-    "sourceMap": false,
+    "skipLibCheck": true,
+    "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
     "target": "ES2022",
-    "useUnknownInCatchVariables": true
+    "useUnknownInCatchVariables": true,
+    "verbatimModuleSyntax": true
   },
-  "exclude": [
-    "__tests__",
-    "__mocks__",
-    "coverage",
-    "dist",
-    "node_modules",
-    "**/*.(spec|test).(j|t)s"
-  ],
-  "include": ["src"]
+  "exclude": ["__tests__", "__mocks__", "coverage", "dist", "node_modules"],
+  "include": ["src", "src/**/*.spec.ts"]
 }

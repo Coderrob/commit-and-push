@@ -17,8 +17,8 @@
 
 import * as core from '@actions/core';
 
-import { Action } from './action.js';
-import { Input } from './types.js';
+import { Action } from './action';
+import { Input } from './types';
 
 describe('Action', () => {
   let infoSpy: jest.SpyInstance;
@@ -43,11 +43,34 @@ describe('Action', () => {
   };
 
   beforeEach(() => {
-    infoSpy = jest.spyOn(core, 'info');
-    setFailedSpy = jest.spyOn(core, 'setFailed');
+    infoSpy = jest.spyOn(core, 'info').mockImplementation();
+    setFailedSpy = jest.spyOn(core, 'setFailed').mockImplementation();
   });
 
   afterEach(jest.clearAllMocks);
+
+  describe('constructor', () => {
+    it('should throw error for invalid repository format', () => {
+      const invalidInputs = { ...mockInputs, [Input.REPOSITORY]: 'invalid' };
+      expect(() => new Action(invalidInputs)).toThrow(
+        'Invalid repository format. Expected format: owner/repo'
+      );
+    });
+
+    it('should throw error for repository without slash', () => {
+      const invalidInputs = { ...mockInputs, [Input.REPOSITORY]: 'ownerrepo' };
+      expect(() => new Action(invalidInputs)).toThrow(
+        'Invalid repository format. Expected format: owner/repo'
+      );
+    });
+
+    it('should throw error for repository with empty parts', () => {
+      const invalidInputs = { ...mockInputs, [Input.REPOSITORY]: 'owner/' };
+      expect(() => new Action(invalidInputs)).toThrow(
+        'Invalid repository format. Expected format: owner/repo'
+      );
+    });
+  });
 
   describe('execute', () => {
     let action: Action;
@@ -107,6 +130,37 @@ describe('Action', () => {
       );
       expect(pushChangesSpy).toHaveBeenCalledTimes(1);
       expect(pushChangesSpy).toHaveBeenNthCalledWith(1, 'origin', 'test', true);
+    });
+
+    it('should skip push when no changes to commit', async () => {
+      updateConfigSpy.mockReturnValue(Promise.resolve(0));
+      fetchLatestSpy.mockReturnValue(Promise.resolve(0));
+      checkoutBranchSpy.mockReturnValue(Promise.resolve(0));
+      stageChangesSpy.mockReturnValue(Promise.resolve(0));
+      commitChangesSpy.mockReturnValue(Promise.resolve(1)); // No changes
+      pushChangesSpy.mockReturnValue(Promise.resolve(0));
+
+      await action.execute();
+
+      expect(infoSpy).toHaveBeenCalledWith(
+        'No changes to commit. Skipping push and pull request.'
+      );
+      expect(pushChangesSpy).not.toHaveBeenCalled();
+      expect(setFailedSpy).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when commit fails', async () => {
+      updateConfigSpy.mockReturnValue(Promise.resolve(0));
+      fetchLatestSpy.mockReturnValue(Promise.resolve(0));
+      checkoutBranchSpy.mockReturnValue(Promise.resolve(0));
+      stageChangesSpy.mockReturnValue(Promise.resolve(0));
+      commitChangesSpy.mockReturnValue(Promise.resolve(2)); // Error
+
+      await action.execute();
+
+      expect(setFailedSpy).toHaveBeenCalledWith(
+        'Action failed: Commit failed. Please check your commit message format and ensure GPG is set up if commit signing is enabled.. Please review the logs for more details.'
+      );
     });
   });
 });

@@ -65,20 +65,13 @@ This action uses a Node.js runtime configuration.
           - name: Run Commit and Push Changes
             uses: ./
             with:
-              github-hostname: <value>
-              github-token: <value>
-              repository: <value>
-              remote-ref: <value>
-              fetch-latest: <value>
-              branch: <value>
-              create-branch: <value>
-              directory-path: <value>
-              author-name: <value>
-              author-email: <value>
-              sign-commit: <value>
-              commit-message: <value>
-              force-push: <value>
-              open-pull-request: <value>
+              github-token: ${{ github.token }}
+              repository: ${{ github.repository }}
+              branch: main
+              directory-path: .
+              author-name: GitHub Actions
+              author-email: github-actions@noreply.github.com
+              commit-message: Automated commit by GitHub Actions
 
 ## Acknowledgments
 

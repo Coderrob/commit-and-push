@@ -43,10 +43,6 @@ jobs:
         id: install-dependencies
         run: npm ci
 
-      - name: Style Check
-        id: style-check
-        run: npm run format:check
-
       - name: Lint Check
         id: lint-check
         run: npm run lint

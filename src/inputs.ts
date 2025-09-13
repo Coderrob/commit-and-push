@@ -16,9 +16,11 @@
  */
 
 import * as core from '@actions/core';
+import { InvalidInputKeyError } from './errors';
 
-import { Input, InputEntry } from './types.js';
+import { Input } from './types';
 
+import type { InputEntry } from './types';
 export const actionInputs: Record<Input, InputEntry> = {
   [Input.AUTHOR_EMAIL]: {
     id: Input.AUTHOR_EMAIL,
@@ -125,7 +127,7 @@ export const actionInputs: Record<Input, InputEntry> = {
 export const getInputValue = new Proxy({} as Record<Input, string>, {
   get: (_, key: string) => {
     if (!Object.values(Input).includes(key as Input)) {
-      throw new Error(`Invalid input key: ${key}`);
+      throw new InvalidInputKeyError(key);
     }
     const entry = actionInputs[key as Input];
     const value = core.getInput(entry.id, { required: entry.required });

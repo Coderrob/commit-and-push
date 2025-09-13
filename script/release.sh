@@ -48,14 +48,28 @@ semver_tag_glob='v[0-9].[0-9].[0-9]*'
 git_remote='origin'
 major_semver_tag_regex='\(v[0-9]*\)'
 
-# Terminal colors
-OFF='\033[0m'
-BOLD_RED='\033[1;31m'
-BOLD_GREEN='\033[1;32m'
-BOLD_BLUE='\033[1;34m'
-BOLD_PURPLE='\033[1;35m'
-BOLD_UNDERLINED='\033[1;4m'
-BOLD='\033[1m'
+# Function to compare semver versions
+# Returns 0 if v1 == v2, 1 if v1 > v2, 2 if v1 < v2
+compare_versions() {
+  local v1=$1
+  local v2=$2
+  # Remove 'v' prefix
+  v1=${v1#v}
+  v2=${v2#v}
+  # Split into major.minor.patch
+  IFS='.' read -r major1 minor1 patch1 <<< "$v1"
+  IFS='.' read -r major2 minor2 patch2 <<< "$v2"
+  # Compare major
+  if (( major1 > major2 )); then echo 1; return; fi
+  if (( major1 < major2 )); then echo 2; return; fi
+  # Compare minor
+  if (( minor1 > minor2 )); then echo 1; return; fi
+  if (( minor1 < minor2 )); then echo 2; return; fi
+  # Compare patch
+  if (( patch1 > patch2 )); then echo 1; return; fi
+  if (( patch1 < patch2 )); then echo 2; return; fi
+  echo 0
+}
 
 # 1. Retrieve the latest release tag
 if ! latest_tag=$(git describe --abbrev=0 --match="$semver_tag_glob"); then
@@ -68,7 +82,12 @@ fi
 echo -e "The latest release tag is: ${BOLD_BLUE}${latest_tag}${OFF}"
 
 # 3. Prompt the user for a new release tag
-read -r -p 'Enter a new release tag (vX.X.X format): ' new_tag
+if [[ -n "$RELEASE_TAG" ]]; then
+  new_tag="$RELEASE_TAG"
+  echo -e "Using release tag from environment: ${BOLD_BLUE}$new_tag${OFF}"
+else
+  read -r -p 'Enter a new release tag (vX.X.X format): ' new_tag
+fi
 
 # 4. Validate the new release tag
 if echo "$new_tag" | grep -q -E "$semver_tag_regex"; then
@@ -80,14 +99,30 @@ else
     exit 1
 fi
 
-# 5. Remind user to update the version field in package.json
-echo -e -n "Make sure the version field in package.json is ${BOLD_BLUE}$new_tag${OFF}. Yes? [Y/${BOLD_UNDERLINED}n${OFF}] "
-read -r YN
-
-if [[ ! ($YN == "y" || $YN == "Y") ]]; then
-    # Package.json version field is not up to date
-    echo -e "Please update the package.json version to ${BOLD_PURPLE}$new_tag${OFF} and commit your changes"
+# Compare new tag with latest tag
+if [[ "$latest_tag" != "[unknown]" ]]; then
+  comparison=$(compare_versions "$new_tag" "$latest_tag")
+  if [[ $comparison -eq 2 ]]; then
+    echo -e "${BOLD_RED}Error: New tag $new_tag is not greater than latest tag $latest_tag${OFF}"
     exit 1
+  elif [[ $comparison -eq 0 ]]; then
+    echo -e "${BOLD_RED}Error: New tag $new_tag is the same as latest tag $latest_tag${OFF}"
+    exit 1
+  fi
+fi
+
+# 5. Remind user to update the version field in package.json
+if [[ -n "$SKIP_CONFIRMATION" ]]; then
+  echo -e "Skipping confirmation for package.json version update."
+else
+  echo -e -n "Make sure the version field in package.json is ${BOLD_BLUE}$new_tag${OFF}. Yes? [Y/${BOLD_UNDERLINED}n${OFF}] "
+  read -r YN
+
+  if [[ ! ($YN == "y" || $YN == "Y") ]]; then
+      # Package.json version field is not up to date
+      echo -e "Please update the package.json version to ${BOLD_PURPLE}$new_tag${OFF} and commit your changes"
+      exit 1
+  fi
 fi
 
 # 6. Tag a new release

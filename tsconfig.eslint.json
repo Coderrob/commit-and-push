@@ -9,7 +9,8 @@
     "inlineSources": false,
     "noEmit": true,
     "sourceMap": true,
-    "target": "es5"
+    "target": "es5",
+    "verbatimModuleSyntax": false
   },
   "exclude": ["dist", "node_modules"],
   "extends": "./tsconfig.json",

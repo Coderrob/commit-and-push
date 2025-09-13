@@ -15,6 +15,33 @@
  *
  */
 
+export const DISALLOWED_PATTERNS: Readonly<RegExp[]> = Object.freeze([
+  /\.\./,
+  /[\r\n]/,
+  /[;&|]/,
+  /`/,
+  /\$/
+]);
+
+/* Enums */
+
+export enum GitCommand {
+  ADD = 'add',
+  BRANCH = 'branch',
+  CHECKOUT = 'checkout',
+  CLONE = 'clone',
+  CONFIG = 'config',
+  COMMIT = 'commit',
+  FETCH = 'fetch',
+  MERGE = 'merge',
+  PULL = 'pull',
+  PUSH = 'push',
+  RESET = 'reset',
+  REV_PARSE = 'rev-parse',
+  STATUS = 'status',
+  TAG = 'tag'
+}
+
 export enum Input {
   AUTHOR_EMAIL = 'author-email',
   AUTHOR_NAME = 'author-name',
@@ -35,6 +62,36 @@ export enum Input {
 export enum Output {
   COMMIT_HASH = 'commit-hash'
 }
+
+export enum Quote {
+  SINGLE = "'",
+  DOUBLE = '"'
+}
+
+/* Constants (enum-dependent) */
+
+export const ALLOWED_COMMANDS: Readonly<GitCommand[]> = Object.freeze([
+  GitCommand.ADD,
+  GitCommand.BRANCH,
+  GitCommand.CHECKOUT,
+  GitCommand.CLONE,
+  GitCommand.CONFIG,
+  GitCommand.COMMIT,
+  GitCommand.FETCH,
+  GitCommand.MERGE,
+  GitCommand.PULL,
+  GitCommand.PUSH,
+  GitCommand.RESET,
+  GitCommand.REV_PARSE,
+  GitCommand.STATUS,
+  GitCommand.TAG
+]);
+
+/* Types */
+
+export type InputEntry = IEntry<Input>;
+
+/* Interfaces */
 
 export interface GitHubParams {
   readonly baseUrl: string;
@@ -59,28 +116,6 @@ export interface GitWorkflowParams {
   readonly signCommit: boolean;
 }
 
-export enum GitCommand {
-  ADD = 'add',
-  BRANCH = 'branch',
-  CHECKOUT = 'checkout',
-  CLONE = 'clone',
-  CONFIG = 'config',
-  COMMIT = 'commit',
-  FETCH = 'fetch',
-  MERGE = 'merge',
-  PULL = 'pull',
-  PUSH = 'push',
-  RESET = 'reset',
-  REV_PARSE = 'rev-parse',
-  STATUS = 'status',
-  TAG = 'tag'
-}
-
-export type InputEntry = IEntry<Input>;
-
-/**
- *  InputEntry interface definition
- */
 export interface IEntry<T> {
   id: T;
   default: string;
@@ -90,18 +125,11 @@ export interface IEntry<T> {
   value?: string;
 }
 
-/**
- * Command interface definition
- */
-export interface ICommand {
-  command: GitCommand;
-  args?: string[];
+export interface IExecute {
+  execute(): Promise<void>;
 }
 
-/**
- * Execute interface definition
- */
-export interface IExecute {
+export interface ICommand {
   execute(): Promise<void>;
 }
 
@@ -118,42 +146,18 @@ export interface IGit {
   pushChanges(remote: string, branch: string, force?: boolean): Promise<number>;
 }
 
-/**
- * Disallowed patterns for input validation
- * @type {RegExp[]}
- * @constant {RegExp[]} DISALLOWED_PATTERNS
- */
-export const DISALLOWED_PATTERNS: Readonly<RegExp[]> = Object.freeze([
-  /\.\./g, // Prevent directory traversal
-  /[\r]/g, // Prevent multi-line injection
-  /[\n]/g, // Prevent multi-line injection
-  /[;&|]/g, // Prevent command chaining
-  /`/g, // Prevent command substitution
-  /\$/g // Prevent variable interpolation
-]);
+export interface IGitHubClient {
+  createPullRequest(
+    fromBranch: string,
+    toBranch: string,
+    title?: string,
+    body?: string
+  ): Promise<void>;
+}
 
-/**
- * Allowed commands for input validation
- * @type {Set<GitCommand>} ALLOWED_COMMANDS
- * @constant {Set<Command>} ALLOWED_COMMANDS
- */
-export const ALLOWED_COMMANDS: Readonly<GitCommand[]> = Object.freeze(
-  Array.from(
-    new Set([
-      GitCommand.ADD,
-      GitCommand.BRANCH,
-      GitCommand.CHECKOUT,
-      GitCommand.CLONE,
-      GitCommand.COMMIT,
-      GitCommand.CONFIG,
-      GitCommand.FETCH,
-      GitCommand.MERGE,
-      GitCommand.PULL,
-      GitCommand.PUSH,
-      GitCommand.RESET,
-      GitCommand.REV_PARSE,
-      GitCommand.STATUS,
-      GitCommand.TAG
-    ])
-  )
-);
+export interface IGitCommand {
+  command: GitCommand;
+  args?: string[];
+}
+
+/* End of file */

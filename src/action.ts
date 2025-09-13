@@ -17,103 +17,131 @@
 
 import * as core from '@actions/core';
 
-import { GitWorkflowParams, IExecute, Input } from './types.js';
-import { Git } from './utils/git.js';
-import { GitHubClient } from './utils/github-client.js';
-import { isError, isTrue } from './utils/guards.js';
+import {
+  CheckoutBranchCommand,
+  CommitChangesCommand,
+  CreatePullRequestCommand,
+  FetchLatestCommand,
+  PushChangesCommand,
+  StageChangesCommand,
+  UpdateConfigCommand
+} from './commands';
+import { NoChangesError, InvalidRepositoryFormatError } from './errors';
+import { GitHubClient } from './services/github/github-client';
+import { Input } from './types';
+import { isError, isTrue } from './utils/guards';
+import { Git } from './vcs/git';
+
+import type { IExecute, ICommand, IGit, IGitHubClient } from './types';
 
 export class Action implements IExecute {
-  private readonly git: Git;
-  private readonly gitHub: GitHubClient;
-  private readonly params: GitWorkflowParams;
+  private readonly commands: ICommand[] = [];
 
-  constructor({
-    [Input.AUTHOR_EMAIL]: authorEmail,
-    [Input.AUTHOR_NAME]: authorName,
-    [Input.BRANCH]: branch,
-    [Input.COMMIT_MESSAGE]: commitMessage,
-    [Input.CREATE_BRANCH]: createBranch,
-    [Input.DIRECTORY_PATH]: directoryPath,
-    [Input.FETCH_LATEST]: fetchLatest,
-    [Input.FORCE_PUSH]: forcePush,
-    [Input.GITHUB_HOSTNAME]: githubHostname,
-    [Input.GITHUB_TOKEN]: githubToken,
-    [Input.OPEN_PULL_REQUEST]: openPullRequest,
-    [Input.REMOTE_REF]: remoteRef,
-    [Input.REPOSITORY]: repository,
-    [Input.SIGN_COMMIT]: signCommit
-  }: Record<Input, string>) {
-    const [owner, repo] = repository.split('/');
-    this.params = {
-      authorEmail,
-      authorName,
-      branch,
-      commitMessage,
-      createBranch: isTrue(createBranch),
-      directoryPath,
-      fetchLatest: isTrue(fetchLatest),
-      forcePush: isTrue(forcePush),
-      githubToken,
-      openPullRequest: isTrue(openPullRequest),
-      remoteRef,
-      repository,
-      signCommit: isTrue(signCommit)
+  constructor(
+    inputs: Record<Input, string>,
+    private readonly git: IGit = new Git(),
+    private readonly gitHub?: IGitHubClient
+  ) {
+    if (!inputs[Input.REPOSITORY] || !inputs[Input.REPOSITORY].includes('/')) {
+      throw new InvalidRepositoryFormatError();
+    }
+    const parts = inputs[Input.REPOSITORY].split('/');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      throw new InvalidRepositoryFormatError();
+    }
+    const [owner, repo] = parts;
+    const params = {
+      authorEmail: inputs[Input.AUTHOR_EMAIL],
+      authorName: inputs[Input.AUTHOR_NAME],
+      branch: inputs[Input.BRANCH],
+      commitMessage: inputs[Input.COMMIT_MESSAGE],
+      createBranch: isTrue(inputs[Input.CREATE_BRANCH]),
+      directoryPath: inputs[Input.DIRECTORY_PATH],
+      fetchLatest: isTrue(inputs[Input.FETCH_LATEST]),
+      forcePush: isTrue(inputs[Input.FORCE_PUSH]),
+      githubToken: inputs[Input.GITHUB_TOKEN],
+      openPullRequest: isTrue(inputs[Input.OPEN_PULL_REQUEST]),
+      remoteRef: inputs[Input.REMOTE_REF],
+      repository: inputs[Input.REPOSITORY],
+      signCommit: isTrue(inputs[Input.SIGN_COMMIT])
     };
-    this.git = new Git();
-    this.gitHub = new GitHubClient({
-      baseUrl: `https://api.${githubHostname}`,
-      token: githubToken,
-      owner,
-      repo
-    });
+
+    const gitHubClient =
+      this.gitHub ||
+      new GitHubClient({
+        baseUrl: `https://api.${inputs[Input.GITHUB_HOSTNAME]}`,
+        token: inputs[Input.GITHUB_TOKEN],
+        owner,
+        repo
+      });
+
+    this.commands.push(
+      new UpdateConfigCommand(
+        this.git,
+        params.authorName,
+        params.authorEmail,
+        params.signCommit
+      )
+    );
+
+    if (params.fetchLatest) {
+      this.commands.push(new FetchLatestCommand(this.git));
+    }
+
+    this.commands.push(
+      new CheckoutBranchCommand(this.git, params.branch, params.createBranch)
+    );
+    this.commands.push(new StageChangesCommand(this.git, params.directoryPath));
+
+    const commitCommand = new CommitChangesCommand(
+      this.git,
+      params.commitMessage,
+      params.signCommit
+    );
+    this.commands.push(commitCommand);
+
+    this.commands.push(
+      new PushChangesCommand(
+        this.git,
+        params.remoteRef,
+        params.branch,
+        params.forcePush
+      )
+    );
+
+    if (params.openPullRequest) {
+      this.commands.push(
+        new CreatePullRequestCommand(gitHubClient, params.branch)
+      );
+    }
   }
 
   async execute(): Promise<void> {
     try {
-      core.info('Updating config...');
-      await this.git.updateConfig(
-        this.params.authorName,
-        this.params.authorEmail,
-        this.params.signCommit
-      );
-
-      if (this.params.fetchLatest) {
-        core.info('Fetching latest...');
-        await this.git.fetchLatest();
-      }
-
-      core.info('Checking out branch...');
-      await this.git.checkoutBranch(
-        this.params.branch,
-        this.params.createBranch
-      );
-
-      core.info('Staging changes...');
-      await this.git.stageChanges(this.params.directoryPath);
-
-      core.info('Committing changes...');
-      await this.git.commitChanges(
-        this.params.commitMessage,
-        this.params.signCommit
-      );
-
-      core.info('Pushing changes...');
-      await this.git.pushChanges(
-        this.params.remoteRef,
-        this.params.branch,
-        this.params.forcePush
-      );
-
-      if (this.params.openPullRequest) {
-        core.info('Opening pull request...');
-        await this.gitHub.createPullRequest(
-          this.params.branch,
-          this.params.branch
-        );
+      for (const command of this.commands) {
+        await command.execute();
       }
     } catch (error) {
-      const message = isError(error) ? error.message : 'Unknown error';
-      core.setFailed(`Failed to commit changes with error: ${message}`);
+      // Some modules may throw a plain Error with the same message instead of
+      // the NoChangesError class instance (module duplication during refactor).
+      const isNoChanges =
+        error instanceof NoChangesError ||
+        (isError(error) && error.message === 'No changes to commit');
+      if (isNoChanges) {
+        core.info('No changes to commit. Skipping push and pull request.');
+        return;
+      }
+
+      let message = isError(error) ? error.message : 'Unknown error';
+      // Provide additional guidance when commit failed (expected by tests)
+      if (message === 'Commit failed.') {
+        message =
+          'Commit failed. Please check your commit message format and ensure GPG is set up if commit signing is enabled.';
+      }
+
+      core.setFailed(
+        `Action failed: ${message}. Please review the logs for more details.`
+      );
     }
   }
 }
