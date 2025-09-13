@@ -1,1 +1,0 @@
-{"version":3,"file":"NoChangesError.js","sourceRoot":"","sources":["../../src/errors/NoChangesError.ts"],"names":[],"mappings":"AAAA;;GAEG;AAEH,MAAM,OAAO,cAAe,SAAQ,KAAK;IACvC;QACE,KAAK,CAAC,sBAAsB,CAAC,CAAC;QAC9B,IAAI,CAAC,IAAI,GAAG,gBAAgB,CAAC;IAC/B,CAAC;CACF"}
