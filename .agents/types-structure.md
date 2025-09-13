@@ -61,14 +61,14 @@ deep paths.
 - Keep pure-declaration files free of runtime logic (no function bodies that
   execute work at module import).
 
-* Use `export` for all symbols that cross module boundaries. Prefer
+- Use `export` for all symbols that cross module boundaries. Prefer
   `Readonly<T[]>` for arrays exposed as constants.
-* Avoid duplicating symbols across files. If you need the same symbol in
+- Avoid duplicating symbols across files. If you need the same symbol in
   multiple places, export it from a single types file and import it where
   needed.
-* Use `enum` only when a clear set of named constants is required. Prefer `type`
+- Use `enum` only when a clear set of named constants is required. Prefer `type`
   and `union` for lightweight discriminated unions.
-* Keep imports to a minimum and only import other types if absolutely necessary
+- Keep imports to a minimum and only import other types if absolutely necessary
   to avoid circular type deps.
 
 ## Linting and CI
@@ -87,7 +87,7 @@ or the project's `test` script to ensure no failures.
 - When reordering an existing file, ensure there are no duplicate declarations
   and that imports elsewhere reference the same exported symbol names.
 
-* If a file previously contained runtime code, consider moving runtime parts
+- If a file previously contained runtime code, consider moving runtime parts
   into a sibling runtime file (e.g., `src/vcs/common.ts`) and keeping
   `src/types.ts` purely declarative.
 

@@ -18,6 +18,7 @@ import * as core from '@actions/core';
 import * as http from '@actions/http-client';
 
 import { PullRequestService } from './pull-request-service';
+import { Guards } from './guards';
 
 jest.mock('@actions/core');
 jest.mock('@actions/http-client');
@@ -132,6 +133,34 @@ describe('PullRequestService', () => {
 
       expect(core.error).toHaveBeenCalledWith(
         'Error creating pull request: String error'
+      );
+    });
+
+    it('should throw PullRequestCreationError with correct message when Guards.isError returns true', async () => {
+      // Arrange
+      const error = new Error('Some error');
+      jest.spyOn(Guards, 'isError').mockReturnValue(true);
+      mockHttpClient.postJson.mockRejectedValue(error);
+
+      await expect(
+        service.createPullRequest('feature-branch', 'main')
+      ).rejects.toThrow('Pull request creation failed: Some error');
+
+      expect(core.error).toHaveBeenCalledWith(
+        'Error creating pull request: Some error'
+      );
+    });
+
+    it('should throw PullRequestCreationError with stringified error when Guards.isError returns false', async () => {
+      jest.spyOn(Guards, 'isError').mockReturnValue(false);
+      mockHttpClient.postJson.mockRejectedValue({ foo: 'bar' });
+
+      await expect(
+        service.createPullRequest('feature-branch', 'main')
+      ).rejects.toThrow('Pull request creation failed: [object Object]');
+
+      expect(core.error).toHaveBeenCalledWith(
+        'Error creating pull request: [object Object]'
       );
     });
   });
