@@ -15,11 +15,11 @@
  *
  */
 
-export { Git } from '../vcs/git';
+export { Git } from './git';
 export {
   GitCommandExecutor,
   ensureQuoted,
   isExecOutputSuccess,
   sanitizeInput,
   execCommand
-} from '../vcs/common';
+} from './common';

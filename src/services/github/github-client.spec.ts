@@ -21,7 +21,8 @@ import * as http from '@actions/http-client';
 import { GitHubClient } from './github-client';
 import { PullRequestService } from './pull-request-service';
 
-import type { GitHubParams } from '../types';
+import type { GitHubParams } from '../../types';
+
 describe('GitHubClient', () => {
   let httpClient: jest.Mocked<http.HttpClient>;
   let warningSpy: jest.SpyInstance;

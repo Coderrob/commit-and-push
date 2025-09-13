@@ -25,6 +25,13 @@ export class GitHubClient implements IGitHubClient {
     this.pullRequestService = new PullRequestService(params);
   }
 
+  /**
+   * Create a pull request on GitHub.
+   * @param fromBranch - The name of the branch where your changes are implemented.
+   * @param toBranch - The name of the branch you want the changes pulled into. This should be the branch you made the changes against.
+   * @param title - The title of the pull request.
+   * @param body - The contents of the pull request.
+   */
   async createPullRequest(
     fromBranch: string,
     toBranch: string,

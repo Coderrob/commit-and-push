@@ -18,7 +18,7 @@ import * as core from '@actions/core';
 import * as http from '@actions/http-client';
 
 import { PullRequestService } from './pull-request-service';
-import { Guards } from './guards';
+import { Guards } from '../../utils/guards';
 
 jest.mock('@actions/core');
 jest.mock('@actions/http-client');

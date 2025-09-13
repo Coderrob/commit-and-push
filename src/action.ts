@@ -33,6 +33,7 @@ import { isError, isTrue } from './utils/guards';
 import { Git } from './vcs/git';
 
 import type { IExecute, ICommand, IGit, IGitHubClient } from './types';
+
 export class Action implements IExecute {
   private readonly commands: ICommand[] = [];
 
