@@ -30,7 +30,7 @@ inputs:
   github-token:
     default: ${{ github.token }}
     description: GitHub token used for authentication
-    required: false
+    required: true
   repository:
     default: ${{ github.repository }}
     description: GitHub repository in the format owner/repository

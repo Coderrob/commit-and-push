@@ -15,7 +15,6 @@
  * limitations under the License.
  *
  */
-import { ExitCode } from '@actions/core';
 
 export const debug = jest.fn();
 export const error = jest.fn();
@@ -25,4 +24,7 @@ export const setOutput = jest.fn();
 export const setFailed = jest.fn();
 export const warning = jest.fn();
 
-export { ExitCode };
+export const ExitCode = {
+  Success: 0,
+  Failure: 1
+};

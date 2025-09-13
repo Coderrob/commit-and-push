@@ -15,21 +15,50 @@
  *
  */
 
-import * as common from './common.js';
-import { Git } from './git.js';
+import * as fs from 'fs';
+
+import { Git } from './git';
+
+jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
+  existsSync: jest.fn()
+}));
+
+jest.mock('../vcs/common', () => ({
+  ...jest.requireActual('../vcs/common'),
+  GitCommandExecutor: {
+    execCommand: jest.fn(),
+    isExecOutputSuccess: jest.fn(),
+    ensureQuoted: jest.fn(),
+    sanitizeInput: jest.fn()
+  }
+}));
 
 describe('Git', () => {
   let git: Git;
-  let execCommandSpy: jest.SpyInstance;
-  let isExecOutputSuccessSpy: jest.SpyInstance;
+  let execCommandSpy: jest.Mock;
+  let isExecOutputSuccessSpy: jest.Mock;
 
   beforeEach(() => {
-    isExecOutputSuccessSpy = jest.spyOn(common, 'isExecOutputSuccess');
-    execCommandSpy = jest.spyOn(common, 'execCommand');
+    const mockedCommon = jest.requireMock('../vcs/common');
+    execCommandSpy = mockedCommon.GitCommandExecutor.execCommand as jest.Mock;
+    isExecOutputSuccessSpy = mockedCommon.GitCommandExecutor
+      .isExecOutputSuccess as jest.Mock;
+
+    // Set up ensureQuoted to return quoted strings
+    mockedCommon.GitCommandExecutor.ensureQuoted.mockImplementation(
+      (str: string) => `"${str}"`
+    );
+
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
     git = new Git();
   });
 
-  afterEach(jest.clearAllMocks);
+  afterEach(() => {
+    jest.clearAllMocks();
+    execCommandSpy.mockReset();
+    isExecOutputSuccessSpy.mockReset();
+  });
 
   describe('updateConfig', () => {
     it('should update git config with name, email, and to sign commits', async () => {
@@ -129,11 +158,21 @@ describe('Git', () => {
         command: 'add'
       });
     });
+
+    it('should throw error if directory does not exist', async () => {
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
+      await expect(git.stageChanges('/nonexistent')).rejects.toThrow(
+        "Directory path '/nonexistent' does not exist."
+      );
+      expect(execCommandSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('commitChanges', () => {
     it('should commit changes with the specified message and sign them if required', async () => {
-      execCommandSpy.mockResolvedValueOnce({ exitCode: 0 });
+      execCommandSpy.mockImplementationOnce(() =>
+        Promise.resolve({ exitCode: 0 })
+      );
       const exitCode = await git.commitChanges('You shall not pass!', true);
       expect(exitCode).toEqual(0);
       expect(execCommandSpy).toHaveBeenCalledTimes(1);
@@ -144,7 +183,9 @@ describe('Git', () => {
     });
 
     it('should commit changes with the specified message', async () => {
-      execCommandSpy.mockResolvedValueOnce({ exitCode: 0 });
+      execCommandSpy.mockImplementationOnce(() =>
+        Promise.resolve({ exitCode: 0 })
+      );
       const exitCode = await git.commitChanges('You shall not pass!');
       expect(exitCode).toEqual(0);
       expect(execCommandSpy).toHaveBeenCalledTimes(1);
@@ -153,14 +194,38 @@ describe('Git', () => {
         command: 'commit'
       });
     });
+
+    it('should return 1 when no changes to commit', async () => {
+      execCommandSpy.mockRejectedValueOnce(
+        new Error('nothing to commit, working tree clean')
+      );
+      const exitCode = await git.commitChanges('No changes message');
+      expect(exitCode).toEqual(1);
+      expect(execCommandSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return 2 when commit fails for other reasons', async () => {
+      execCommandSpy.mockRejectedValueOnce(
+        new Error('Some other commit error')
+      );
+      const exitCode = await git.commitChanges('Error message');
+      expect(exitCode).toEqual(2);
+      expect(execCommandSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('pushChanges', () => {
     it('should push changes to the specified remote and branch with force push', async () => {
       execCommandSpy
-        .mockResolvedValueOnce({ exitCode: 0 })
-        .mockResolvedValueOnce({ exitCode: 0, stdout: '1234567890' });
-      isExecOutputSuccessSpy.mockResolvedValueOnce(true);
+        .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' })
+        .mockResolvedValueOnce({
+          exitCode: 0,
+          stdout: '1234567890',
+          stderr: ''
+        });
+      isExecOutputSuccessSpy
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true);
       const exitCode = await git.pushChanges('origin', 'main', true);
       expect(exitCode).toEqual(0);
       expect(execCommandSpy).toHaveBeenCalledTimes(2);
@@ -176,9 +241,15 @@ describe('Git', () => {
 
     it('should push changes to the specified remote and branch', async () => {
       execCommandSpy
-        .mockResolvedValueOnce({ exitCode: 0 })
-        .mockResolvedValueOnce({ exitCode: 0, stdout: '1234567890' });
-      isExecOutputSuccessSpy.mockResolvedValueOnce(true);
+        .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' })
+        .mockResolvedValueOnce({
+          exitCode: 0,
+          stdout: '1234567890',
+          stderr: ''
+        });
+      isExecOutputSuccessSpy
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true);
       const exitCode = await git.pushChanges('origin', 'main');
       expect(exitCode).toEqual(0);
       expect(execCommandSpy).toHaveBeenCalledTimes(2);

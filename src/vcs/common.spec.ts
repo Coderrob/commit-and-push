@@ -18,8 +18,8 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
-import { GitCommand } from '../types.js';
-import { ensureQuoted, execCommand, sanitizeInput } from './common.js';
+import { GitCommand } from '../types';
+import { ensureQuoted, execCommand, sanitizeInput } from './common';
 
 describe('Common', () => {
   afterEach(jest.clearAllMocks);

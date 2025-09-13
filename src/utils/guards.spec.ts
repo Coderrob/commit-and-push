@@ -15,7 +15,7 @@
  *
  */
 
-import { isError, isString, isTrue } from './guards.js';
+import { isError, isString, isTrue } from './guards';
 
 describe('guards', () => {
   describe('isString', () => {

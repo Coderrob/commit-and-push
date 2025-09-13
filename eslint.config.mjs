@@ -50,7 +50,7 @@ export default [
       sourceType: 'module',
       parserOptions: {
         project: ['tsconfig.eslint.json'],
-        tsconfigRootDir: '.'
+        tsconfigRootDir: __dirname
       }
     },
     settings: {

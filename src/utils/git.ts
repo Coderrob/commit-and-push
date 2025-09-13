@@ -15,12 +15,15 @@
  *
  */
 
+import * as fs from 'fs';
+
 import * as core from '@actions/core';
 
-import { GitCommand, IGit, Output } from '../types.js';
-import { ensureQuoted, execCommand, isExecOutputSuccess } from './common.js';
-import { isError } from './guards.js';
+import { GitCommand, Output } from '../types';
+import { GitCommandExecutor } from '../vcs/common.js';
+import { isError } from './guards';
 
+import type { IGit } from '../types';
 const { ADD, CHECKOUT, COMMIT, CONFIG, FETCH, PUSH, REV_PARSE } = GitCommand;
 
 /**
@@ -40,18 +43,22 @@ export class Git implements IGit {
     userEmail: string,
     signCommit = false
   ): Promise<number> {
-    await execCommand({
+    await GitCommandExecutor.execCommand({
       command: CONFIG,
-      args: ['--global', 'user.name', ensureQuoted(userName)]
+      args: ['--global', 'user.name', GitCommandExecutor.ensureQuoted(userName)]
     });
 
-    await execCommand({
+    await GitCommandExecutor.execCommand({
       command: CONFIG,
-      args: ['--global', 'user.email', ensureQuoted(userEmail)]
+      args: [
+        '--global',
+        'user.email',
+        GitCommandExecutor.ensureQuoted(userEmail)
+      ]
     });
 
     if (signCommit) {
-      await execCommand({
+      await GitCommandExecutor.execCommand({
         command: CONFIG,
         args: ['--global', 'commit.gpgsign', signCommit.toString()]
       });
@@ -64,7 +71,7 @@ export class Git implements IGit {
    * @returns Promise<number> The exit code of the fetch operation.
    */
   public async fetchLatest(): Promise<number> {
-    const { exitCode } = await execCommand({
+    const { exitCode } = await GitCommandExecutor.execCommand({
       command: FETCH,
       args: ['--all']
     });
@@ -81,7 +88,7 @@ export class Git implements IGit {
     branch: string,
     createNew = false
   ): Promise<number> {
-    const { exitCode } = await execCommand({
+    const { exitCode } = await GitCommandExecutor.execCommand({
       command: CHECKOUT,
       args: createNew ? ['-b', branch] : [branch]
     });
@@ -94,9 +101,12 @@ export class Git implements IGit {
    * @returns Promise<number> The exit code of the stage operation.
    */
   public async stageChanges(directoryPath: string): Promise<number> {
-    const { exitCode } = await execCommand({
+    if (!fs.existsSync(directoryPath)) {
+      throw new Error(`Directory path '${directoryPath}' does not exist.`);
+    }
+    const { exitCode } = await GitCommandExecutor.execCommand({
       command: ADD,
-      args: [ensureQuoted(directoryPath)]
+      args: [GitCommandExecutor.ensureQuoted(directoryPath)]
     });
     return exitCode;
   }
@@ -105,24 +115,29 @@ export class Git implements IGit {
    * Commit changes with a message.
    * @param message The commit message.
    * @param signCommit Whether to sign the commit.
-   * @returns Promise<number> The exit code of the commit operation.
+   * @returns Promise<number> The exit code of the commit operation. 0=success, 1=no changes, 2=other error.
    */
   public async commitChanges(
     message: string,
     signCommit = false
   ): Promise<number> {
     try {
-      const { exitCode } = await execCommand({
+      const { exitCode } = await GitCommandExecutor.execCommand({
         command: COMMIT,
         args: signCommit
-          ? ['-S', '-m', ensureQuoted(message)]
-          : ['-m', ensureQuoted(message)]
+          ? ['-S', '-m', GitCommandExecutor.ensureQuoted(message)]
+          : ['-m', GitCommandExecutor.ensureQuoted(message)]
       });
       return exitCode;
     } catch (error) {
       const errMessage = isError(error) ? error.message : String(error);
-      core.info(`No changes detected. Skipping commit. ${errMessage}`);
-      return core.ExitCode.Success;
+      if (errMessage.includes('nothing to commit')) {
+        core.info(`No changes detected. Skipping commit. ${errMessage}`);
+        return 1; // No changes
+      } else {
+        core.error(`Commit failed: ${errMessage}`);
+        return 2; // Other error
+      }
     }
   }
 
@@ -138,21 +153,21 @@ export class Git implements IGit {
     branch: string,
     force = false
   ): Promise<number> {
-    const pushExecResult = await execCommand({
+    const pushExecResult = await GitCommandExecutor.execCommand({
       command: PUSH,
       args: force ? [remote, branch, '--force'] : [remote, branch]
     });
 
-    if (!isExecOutputSuccess(pushExecResult)) {
+    if (!GitCommandExecutor.isExecOutputSuccess(pushExecResult)) {
       return core.ExitCode.Failure;
     }
 
-    const getCommitHashResult = await execCommand({
+    const getCommitHashResult = await GitCommandExecutor.execCommand({
       command: REV_PARSE,
       args: ['HEAD']
     });
 
-    if (!isExecOutputSuccess(getCommitHashResult)) {
+    if (!GitCommandExecutor.isExecOutputSuccess(getCommitHashResult)) {
       const message = `Failed to get commit hash: ${getCommitHashResult.stderr}`;
       throw new Error(message);
     }

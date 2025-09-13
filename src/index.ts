@@ -15,12 +15,12 @@
  *
  */
 
-import { Action } from './action.js';
-import { getInputValue } from './inputs.js';
-import { Input } from './types.js';
+import { Action } from './action';
+import { getInputValue } from './inputs';
+import { Input } from './types';
 
 (async () => {
-  await new Action({
+  const inputs = {
     [Input.AUTHOR_EMAIL]: getInputValue[Input.AUTHOR_EMAIL],
     [Input.AUTHOR_NAME]: getInputValue[Input.AUTHOR_NAME],
     [Input.BRANCH]: getInputValue[Input.BRANCH],
@@ -35,5 +35,6 @@ import { Input } from './types.js';
     [Input.REMOTE_REF]: getInputValue[Input.REMOTE_REF],
     [Input.REPOSITORY]: getInputValue[Input.REPOSITORY],
     [Input.SIGN_COMMIT]: getInputValue[Input.SIGN_COMMIT]
-  }).execute();
+  };
+  await new Action(inputs).execute();
 })();
