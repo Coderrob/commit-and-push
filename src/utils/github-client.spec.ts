@@ -115,5 +115,39 @@ describe('GitHubClient', () => {
       );
       mockCreatePullRequest.mockRestore();
     });
+
+    it('should delegate createPullRequest to PullRequestService with correct arguments', async () => {
+      const mockCreatePullRequest = jest
+        .spyOn(PullRequestService.prototype, 'createPullRequest')
+        .mockResolvedValue(undefined);
+
+      const client = new GitHubClient(params);
+      await client.createPullRequest('dev', 'main', 'PR Title', 'PR Body');
+
+      expect(mockCreatePullRequest).toHaveBeenCalledWith(
+        'dev',
+        'main',
+        'PR Title',
+        'PR Body'
+      );
+      mockCreatePullRequest.mockRestore();
+    });
+
+    it('should delegate createPullRequest to PullRequestService with undefined title and body', async () => {
+      const mockCreatePullRequest = jest
+        .spyOn(PullRequestService.prototype, 'createPullRequest')
+        .mockResolvedValue(undefined);
+
+      const client = new GitHubClient(params);
+      await client.createPullRequest('dev', 'main');
+
+      expect(mockCreatePullRequest).toHaveBeenCalledWith(
+        'dev',
+        'main',
+        undefined,
+        undefined
+      );
+      mockCreatePullRequest.mockRestore();
+    });
   });
 });
