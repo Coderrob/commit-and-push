@@ -20,7 +20,7 @@ import * as fs from 'fs';
 import * as core from '@actions/core';
 
 import { GitCommand, Output } from '../types';
-import { GitCommandExecutor } from '../vcs/common.js';
+import { GitCommandExecutor } from '../vcs/common';
 import { isError } from './guards';
 
 import type { IGit } from '../types';

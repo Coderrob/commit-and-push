@@ -22,7 +22,7 @@ import * as core from '@actions/core';
 import { GitCommand, Output } from '../types';
 import { isError } from '../utils/guards';
 import { DirectoryNotFoundError, GitCommandFailedError } from '../errors';
-import { GitCommandExecutor } from './common.js';
+import { GitCommandExecutor } from './common';
 
 import type { IGit } from '../types';
 const { ADD, CHECKOUT, COMMIT, CONFIG, FETCH, PUSH, REV_PARSE } = GitCommand;
