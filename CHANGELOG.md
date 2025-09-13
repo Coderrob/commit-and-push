@@ -15,7 +15,7 @@ and this project adheres to
 ### Changed
 
 - **Release Script Version Comparison**: Enhanced `script/release.sh` with
-  semver comparison function to prevent creating tags that are not greater than
+  SemVer comparison function to prevent creating tags that are not greater than
   the latest tag, avoiding downgrades and duplicates.
 - **Release Script Non-Interactive Mode**: Added support for `RELEASE_TAG` and
   `SKIP_CONFIRMATION` environment variables in `script/release.sh` to enable
@@ -23,8 +23,8 @@ and this project adheres to
 - **Error Messages**: Improved error messages across the codebase in
   `src/action.ts` and `src/utils/git.ts` to be more user-friendly and
   actionable, providing guidance on potential fixes.
-- **README Examples**: Updated `README.md` with real example usage instead of
-  placeholders, making it copy-paste ready.
+- **Readme Examples**: Updated `README.md` with real example usage instead of
+  placeholders, making it copypaste ready.
 
 ### Fixed
 

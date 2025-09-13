@@ -75,7 +75,8 @@ const config = {
       tsconfig: './tsconfig.json',
       declaration: false,
       declarationMap: false,
-      sourceMap: true
+      sourceMap: true,
+      tslib: 'tslib'
     }),
     nodeResolve({
       preferBuiltins: true,
