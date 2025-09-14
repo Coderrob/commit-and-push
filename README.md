@@ -1,5 +1,11 @@
 # Commit and Push Changes
 
+[![CI](https://github.com/Coderrob/commit-and-push/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Coderrob/commit-and-push/actions/workflows/ci.yml)
+[![Check dist](https://github.com/Coderrob/commit-and-push/actions/workflows/check-dist.yml/badge.svg?branch=main)](https://github.com/Coderrob/commit-and-push/actions/workflows/check-dist.yml)
+[![Coverage](https://github.com/Coderrob/commit-and-push/raw/main/badges/coverage.svg)](https://github.com/Coderrob/commit-and-push/raw/main/badges/coverage.svg)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Node >=20](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org/)
+
 This action automates committing and pushing code changes to a GitHub
 repository. It ensures updates are regularly applied without manual intervention
 while following security best practices.
