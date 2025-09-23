@@ -29,9 +29,10 @@ describe('GitHubClient', () => {
 
   const params: GitHubParams = {
     baseUrl: 'https://api.github.com',
-    token: 'token',
+    token: 'ghp_1234567890abcdef1234567890abcdef12345678',
     owner: 'owner',
-    repo: 'repo'
+    repo: 'repo',
+    authorName: 'Test Author'
   };
 
   beforeEach(() => {
@@ -56,10 +57,10 @@ describe('GitHubClient', () => {
           head: 'feature',
           base: 'main',
           title: 'Automated Pull Request',
-          body: 'Automated pull request created by GitHub Action.'
+          body: 'Automated pull request created by Test Author.'
         }),
         {
-          Authorization: 'Bearer token',
+          Authorization: 'Bearer ghp_1234567890abcdef1234567890abcdef12345678',
           Accept: 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28'
         }

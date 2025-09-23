@@ -54,6 +54,8 @@ export enum Input {
   GITHUB_HOSTNAME = 'github-hostname',
   GITHUB_TOKEN = 'github-token',
   OPEN_PULL_REQUEST = 'open-pull-request',
+  PULL_REQUEST_BODY = 'pull-request-body',
+  PULL_REQUEST_TITLE = 'pull-request-title',
   REMOTE_REF = 'remote-ref',
   REPOSITORY = 'repository',
   SIGN_COMMIT = 'sign-commit'
@@ -98,6 +100,7 @@ export interface GitHubParams {
   readonly token: string;
   readonly owner: string;
   readonly repo: string;
+  readonly authorName: string;
 }
 
 export interface GitWorkflowParams {

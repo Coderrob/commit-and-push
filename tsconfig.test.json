@@ -17,6 +17,8 @@
   "include": [
     "__mocks__",
     "__tests__",
+    "**/**/*.test.ts",
+    "**/**/*.spec.ts",
     "src",
     "eslint.config.mjs",
     "jest.config.mjs",

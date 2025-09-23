@@ -15,7 +15,7 @@
  *
  */
 
-import { InvalidRepositoryFormatError } from './InvalidRepositoryFormatError';
+import { InvalidRepositoryFormatError } from './invalid-repository-format-error';
 
 describe('InvalidRepositoryFormatError', () => {
   it('should create an error with the correct name and message', () => {

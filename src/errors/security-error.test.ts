@@ -15,23 +15,23 @@
  *
  */
 
-import { InvalidInputError } from './InvalidInputError';
+import { SecurityError } from './security-error';
 
-describe('InvalidInputError', () => {
+describe('SecurityError', () => {
   it('should create an error with the correct name and message', () => {
-    const error = new InvalidInputError();
+    const error = new SecurityError();
 
     expect(error).toBeInstanceOf(Error);
-    expect(error.name).toBe('InvalidInputError');
-    expect(error.message).toBe('Invalid input type');
+    expect(error.name).toBe('SecurityError');
+    expect(error.message).toBe('Security risk detected');
   });
 
   it('should create an error with a custom message', () => {
-    const customMessage = 'Custom error message';
-    const error = new InvalidInputError(customMessage);
+    const customMessage = 'Custom security error message';
+    const error = new SecurityError(customMessage);
 
     expect(error).toBeInstanceOf(Error);
-    expect(error.name).toBe('InvalidInputError');
+    expect(error.name).toBe('SecurityError');
     expect(error.message).toBe(customMessage);
   });
 });

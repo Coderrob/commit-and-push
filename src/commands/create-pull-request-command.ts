@@ -24,7 +24,9 @@ import type { ICommand, IGitHubClient } from '../types';
 export class CreatePullRequestCommand implements ICommand {
   constructor(
     private readonly gitHubClient: IGitHubClient,
-    private readonly branch: string
+    private readonly branch: string,
+    private readonly title?: string,
+    private readonly body?: string
   ) {}
 
   /**
@@ -32,6 +34,11 @@ export class CreatePullRequestCommand implements ICommand {
    */
   async execute(): Promise<void> {
     core.info('Opening pull request...');
-    await this.gitHubClient.createPullRequest(this.branch, 'main');
+    await this.gitHubClient.createPullRequest(
+      this.branch,
+      'main',
+      this.title,
+      this.body
+    );
   }
 }

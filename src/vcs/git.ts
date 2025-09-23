@@ -35,13 +35,13 @@ export class Git implements IGit {
   ): Promise<number> {
     await GitCommandExecutor.execCommand({
       command: CONFIG,
-      args: ['--global', 'user.name', GitCommandExecutor.ensureQuoted(userName)]
+      args: ['--local', 'user.name', GitCommandExecutor.ensureQuoted(userName)]
     });
 
     await GitCommandExecutor.execCommand({
       command: CONFIG,
       args: [
-        '--global',
+        '--local',
         'user.email',
         GitCommandExecutor.ensureQuoted(userEmail)
       ]
@@ -50,7 +50,7 @@ export class Git implements IGit {
     if (signCommit) {
       await GitCommandExecutor.execCommand({
         command: CONFIG,
-        args: ['--global', 'commit.gpgsign', signCommit.toString()]
+        args: ['--local', 'commit.gpgsign', signCommit.toString()]
       });
     }
     return core.ExitCode.Success;

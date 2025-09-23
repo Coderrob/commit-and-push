@@ -42,13 +42,44 @@ describe('BaseHttpClient', () => {
 
     it('should return correct headers with provided token', () => {
       const client = new TestClient();
-      const token = 'abc123';
+      const token = 'ghp_1234567890123456789012345678901234567890'; // Valid GitHub token format
       const headers = client.getHeaders(token);
 
       expect(headers).toEqual({
         Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28'
+      });
+    });
+
+    it('should throw error for empty token', () => {
+      const client = new TestClient();
+      expect(() => client.getHeaders('')).toThrow(
+        'GitHub token is required but was not provided'
+      );
+    });
+
+    it('should throw error for invalid token format', () => {
+      const client = new TestClient();
+      expect(() => client.getHeaders('invalid-token')).toThrow(
+        'GitHub token format appears to be invalid'
+      );
+    });
+
+    it('should accept various GitHub token formats', () => {
+      const client = new TestClient();
+      const validTokens = [
+        'ghp_1234567890123456789012345678901234567890',
+        'gho_1234567890123456789012345678901234567890',
+        'ghu_1234567890123456789012345678901234567890',
+        'ghs_1234567890123456789012345678901234567890',
+        'ghr_1234567890123456789012345678901234567890',
+        'github_pat_12345678901234567890123456789012345678901234567890123456789',
+        '1234567890123456789012345678901234567890' // Legacy format (40+ chars)
+      ];
+
+      validTokens.forEach((token) => {
+        expect(() => client.getHeaders(token)).not.toThrow();
       });
     });
   });

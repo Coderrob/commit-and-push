@@ -101,6 +101,21 @@ export const actionInputs: Record<Input, InputEntry> = {
     required: false,
     deprecationMessage: ''
   },
+  [Input.PULL_REQUEST_BODY]: {
+    id: Input.PULL_REQUEST_BODY,
+    description:
+      'The body content of the pull request when open-pull-request is true',
+    default: '',
+    required: false,
+    deprecationMessage: ''
+  },
+  [Input.PULL_REQUEST_TITLE]: {
+    id: Input.PULL_REQUEST_TITLE,
+    description: 'The title of the pull request when open-pull-request is true',
+    default: 'Automated Pull Request',
+    required: false,
+    deprecationMessage: ''
+  },
   [Input.REPOSITORY]: {
     id: Input.REPOSITORY,
     description: 'The GitHub repository to use for the commit',
