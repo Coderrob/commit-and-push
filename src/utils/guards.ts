@@ -37,6 +37,11 @@ export class Guards {
     return error instanceof Error;
   }
 
+  /**
+   * Checks if the provided value is a boolean.
+   * @param value - The value to check.
+   * @returns true if the value is a boolean; false otherwise.
+   */
   static isBoolean(value: unknown): value is boolean {
     return typeof value === 'boolean';
   }

@@ -49,7 +49,9 @@ describe('Action', () => {
     setFailedSpy = jest.spyOn(core, 'setFailed').mockImplementation();
   });
 
-  afterEach(jest.clearAllMocks);
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('constructor', () => {
     it('should throw error for invalid repository format', () => {

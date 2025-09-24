@@ -15,10 +15,15 @@
  *
  */
 
-export { CheckoutBranchCommand } from './checkout-branch.command';
-export { CommitChangesCommand } from './commit-changes.command';
-export { CreatePullRequestCommand } from './create-pull-request.command';
-export { FetchLatestCommand } from './fetch-latest.command';
-export { PushChangesCommand } from './push-changes.command';
-export { StageChangesCommand } from './stage-changes.command';
-export { UpdateConfigCommand } from './update-config.command';
+export class InvalidInputKeyError extends Error {
+  /**
+   * Creates a new InvalidInputKeyError.
+   * @param key - Optional invalid key that was provided
+   */
+  constructor(key?: string) {
+    super(key ? `Invalid input key: ${key}` : 'Invalid input key');
+    this.name = 'InvalidInputKeyError';
+    // Maintains proper prototype chain for instanceof checks
+    Object.setPrototypeOf(this, InvalidInputKeyError.prototype);
+  }
+}

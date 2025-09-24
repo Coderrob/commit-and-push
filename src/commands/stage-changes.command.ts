@@ -15,10 +15,24 @@
  *
  */
 
-export { CheckoutBranchCommand } from './checkout-branch.command';
-export { CommitChangesCommand } from './commit-changes.command';
-export { CreatePullRequestCommand } from './create-pull-request.command';
-export { FetchLatestCommand } from './fetch-latest.command';
-export { PushChangesCommand } from './push-changes.command';
-export { StageChangesCommand } from './stage-changes.command';
-export { UpdateConfigCommand } from './update-config.command';
+import * as core from '@actions/core';
+
+import type { ICommand, IGit } from '../types';
+
+/**
+ * Command to stage changes in a specified directory.
+ */
+export class StageChangesCommand implements ICommand {
+  constructor(
+    private readonly git: IGit,
+    private readonly directoryPath: string
+  ) {}
+
+  /**
+   * Executes the command to stage changes.
+   */
+  async execute(): Promise<void> {
+    core.info('Staging changes...');
+    await this.git.stageChanges(this.directoryPath);
+  }
+}

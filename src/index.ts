@@ -19,6 +19,10 @@ import { Action } from './action';
 import { getInputValue } from './inputs';
 import { Input } from './types';
 
+/**
+ * Main entry point for the GitHub Action.
+ * Collects all input values and executes the action.
+ */
 (async () => {
   const inputs = {
     [Input.AUTHOR_EMAIL]: getInputValue[Input.AUTHOR_EMAIL],

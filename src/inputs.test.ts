@@ -25,7 +25,7 @@ jest.mock('@actions/core', () => ({
 }));
 
 describe('Input Proxy Handler (src/inputs.ts)', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

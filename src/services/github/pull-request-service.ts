@@ -22,6 +22,7 @@ import { BaseHttpClient } from '../../utils/base-http-client';
 import { Guards } from '../../utils/guards';
 import { RetryHelper } from '../../utils/retry-helper';
 import { PullRequestCreationError } from '../../errors';
+import { Output } from '../../types';
 
 import type { GitHubParams } from '../../types';
 export class PullRequestService extends BaseHttpClient {
@@ -59,9 +60,9 @@ export class PullRequestService extends BaseHttpClient {
     const url = [baseUrl, 'repos', owner, repo, 'pulls'].join('/');
 
     try {
-      await RetryHelper.withRetry(
+      const response = await RetryHelper.withRetry(
         async () => {
-          await this.httpClient.postJson(
+          return await this.httpClient.postJson(
             url,
             JSON.stringify({
               head: fromBranch,
@@ -78,6 +79,15 @@ export class PullRequestService extends BaseHttpClient {
         }
       );
       core.info('Pull request created successfully.');
+      if (
+        response &&
+        typeof response === 'object' &&
+        'number' in response &&
+        'html_url' in response
+      ) {
+        core.setOutput(Output.PULL_REQUEST_NUMBER, response.number);
+        core.setOutput(Output.PULL_REQUEST_URL, response.html_url);
+      }
     } catch (error) {
       const message = Guards.isError(error) ? error.message : String(error);
       core.error(`Error creating pull request: ${message}`);

@@ -15,10 +15,15 @@
  *
  */
 
-export { CheckoutBranchCommand } from './checkout-branch.command';
-export { CommitChangesCommand } from './commit-changes.command';
-export { CreatePullRequestCommand } from './create-pull-request.command';
-export { FetchLatestCommand } from './fetch-latest.command';
-export { PushChangesCommand } from './push-changes.command';
-export { StageChangesCommand } from './stage-changes.command';
-export { UpdateConfigCommand } from './update-config.command';
+export class UnauthorizedCommandError extends Error {
+  constructor(command?: string) {
+    super(
+      command
+        ? `Unauthorized Git command: ${command}`
+        : 'Unauthorized Git command'
+    );
+    this.name = 'UnauthorizedCommandError';
+    // Maintains proper prototype chain for instanceof checks
+    Object.setPrototypeOf(this, UnauthorizedCommandError.prototype);
+  }
+}

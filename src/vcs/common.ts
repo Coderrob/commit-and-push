@@ -29,6 +29,12 @@ import {
 
 import type { IGitCommand } from '../types';
 export class GitCommandExecutor {
+  /**
+   * Ensures a string value is properly quoted for shell execution.
+   * @param value - The value to quote
+   * @param quote - The quote character to use (defaults to double quote)
+   * @returns The quoted string
+   */
   static ensureQuoted(value: string, quote = Quote.DOUBLE): string {
     const length = value.length;
     const hasDoubleQuotes =
@@ -44,10 +50,22 @@ export class GitCommandExecutor {
       : [quote, value, quote].join('');
   }
 
+  /**
+   * Checks if the execution output indicates success.
+   * @param execOutput - The execution output to check
+   * @returns true if exit code is 0, false otherwise
+   */
   static isExecOutputSuccess({ exitCode }: exec.ExecOutput): boolean {
     return exitCode === core.ExitCode.Success;
   }
 
+  /**
+   * Sanitizes input to prevent security vulnerabilities by checking against disallowed patterns.
+   * @param input - The input string to sanitize
+   * @returns The sanitized input string
+   * @throws InvalidInputError if input is not a string
+   * @throws SecurityError if input contains disallowed patterns
+   */
   static sanitizeInput(input: string): string {
     if (!isString(input)) {
       throw new InvalidInputError();
@@ -58,6 +76,13 @@ export class GitCommandExecutor {
     return input;
   }
 
+  /**
+   * Executes a Git command with the specified arguments.
+   * @param gitCommand - The Git command configuration
+   * @returns Promise resolving to the execution output
+   * @throws UnauthorizedCommandError if the command is not in the allowed list
+   * @throws GitCommandFailedError if the command execution fails
+   */
   static async execCommand({
     command,
     args = []

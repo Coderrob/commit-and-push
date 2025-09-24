@@ -28,6 +28,13 @@ import type { IGit } from '../types';
 const { ADD, CHECKOUT, COMMIT, CONFIG, FETCH, PUSH, REV_PARSE } = GitCommand;
 
 export class Git implements IGit {
+  /**
+   * Updates the Git configuration with user name, email, and optional GPG signing.
+   * @param userName - The user name to set in Git config
+   * @param userEmail - The user email to set in Git config
+   * @param signCommit - Whether to enable GPG signing for commits
+   * @returns Promise resolving to exit code (0 for success)
+   */
   public async updateConfig(
     userName: string,
     userEmail: string,
@@ -56,6 +63,10 @@ export class Git implements IGit {
     return core.ExitCode.Success;
   }
 
+  /**
+   * Fetches the latest changes from all remotes.
+   * @returns Promise resolving to exit code (0 for success)
+   */
   public async fetchLatest(): Promise<number> {
     const { exitCode } = await GitCommandExecutor.execCommand({
       command: FETCH,
@@ -64,6 +75,12 @@ export class Git implements IGit {
     return exitCode;
   }
 
+  /**
+   * Checks out the specified branch, optionally creating it if it doesn't exist.
+   * @param branch - The name of the branch to check out
+   * @param createNew - Whether to create the branch if it doesn't exist
+   * @returns Promise resolving to exit code (0 for success)
+   */
   public async checkoutBranch(
     branch: string,
     createNew = false
@@ -75,6 +92,12 @@ export class Git implements IGit {
     return exitCode;
   }
 
+  /**
+   * Stages changes in the specified directory for commit.
+   * @param directoryPath - The path to the directory containing files to stage
+   * @returns Promise resolving to exit code (0 for success)
+   * @throws DirectoryNotFoundError if the directory doesn't exist
+   */
   public async stageChanges(directoryPath: string): Promise<number> {
     if (!fs.existsSync(directoryPath)) {
       throw new DirectoryNotFoundError(directoryPath);
@@ -86,6 +109,12 @@ export class Git implements IGit {
     return exitCode;
   }
 
+  /**
+   * Commits the staged changes with the specified message.
+   * @param message - The commit message
+   * @param signCommit - Whether to sign the commit with GPG
+   * @returns Promise resolving to exit code (0 for success, 1 for no changes, 2 for error)
+   */
   public async commitChanges(
     message: string,
     signCommit = false
@@ -110,6 +139,14 @@ export class Git implements IGit {
     }
   }
 
+  /**
+   * Pushes the committed changes to the remote repository and sets the commit hash output.
+   * @param remote - The remote repository reference
+   * @param branch - The branch to push to
+   * @param force - Whether to force push
+   * @returns Promise resolving to exit code (0 for success)
+   * @throws GitCommandFailedError if getting commit hash fails
+   */
   public async pushChanges(
     remote: string,
     branch: string,
