@@ -15,41 +15,40 @@
  *
  */
 
-import { PullRequestCreationError } from './PullRequestCreationError';
+import { GitCommandFailedError } from './git-command-failed-error';
 
-describe('PullRequestCreationError', () => {
+describe('GitCommandFailedError', () => {
   describe('constructor', () => {
     it.each([
       {
         name: 'should create error with message parameter',
-        message: 'Branch not found',
-        expectedMessage: 'Pull request creation failed: Branch not found',
-        expectedName: 'PullRequestCreationError'
+        message: 'git status failed',
+        expectedMessage: 'Git command failed: git status failed',
+        expectedName: 'GitCommandFailedError'
       },
       {
         name: 'should create error without message parameter',
         message: undefined,
-        expectedMessage: 'Pull request creation failed',
-        expectedName: 'PullRequestCreationError'
+        expectedMessage: 'Git command failed',
+        expectedName: 'GitCommandFailedError'
       },
       {
         name: 'should create error with empty string message',
         message: '',
-        expectedMessage: 'Pull request creation failed',
-        expectedName: 'PullRequestCreationError'
+        expectedMessage: 'Git command failed',
+        expectedName: 'GitCommandFailedError'
       },
       {
         name: 'should create error with detailed message',
-        message: 'Repository access denied',
-        expectedMessage:
-          'Pull request creation failed: Repository access denied',
-        expectedName: 'PullRequestCreationError'
+        message: 'fatal: not a git repository',
+        expectedMessage: 'Git command failed: fatal: not a git repository',
+        expectedName: 'GitCommandFailedError'
       }
     ])('$name', ({ message, expectedMessage, expectedName }) => {
       const error =
         message !== undefined
-          ? new PullRequestCreationError(message)
-          : new PullRequestCreationError();
+          ? new GitCommandFailedError(message)
+          : new GitCommandFailedError();
 
       expect(error).toBeInstanceOf(Error);
       expect(error.message).toBe(expectedMessage);
@@ -58,13 +57,13 @@ describe('PullRequestCreationError', () => {
 
     it('should be throwable', () => {
       expect(() => {
-        throw new PullRequestCreationError('Validation failed');
-      }).toThrow('Pull request creation failed: Validation failed');
+        throw new GitCommandFailedError('git push failed');
+      }).toThrow('Git command failed: git push failed');
     });
 
     it('should have correct prototype chain', () => {
-      const error = new PullRequestCreationError();
-      expect(error.name).toBe('PullRequestCreationError');
+      const error = new GitCommandFailedError();
+      expect(error.name).toBe('GitCommandFailedError');
       expect(error).toBeInstanceOf(Error);
     });
   });

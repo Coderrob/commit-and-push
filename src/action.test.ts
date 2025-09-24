@@ -37,6 +37,8 @@ describe('Action', () => {
     [Input.GITHUB_HOSTNAME]: 'github.com',
     [Input.GITHUB_TOKEN]: 'my-precious',
     [Input.OPEN_PULL_REQUEST]: 'false',
+    [Input.PULL_REQUEST_BODY]: '',
+    [Input.PULL_REQUEST_TITLE]: 'Custom PR title',
     [Input.REMOTE_REF]: 'origin',
     [Input.REPOSITORY]: 'org/repo',
     [Input.SIGN_COMMIT]: 'true'

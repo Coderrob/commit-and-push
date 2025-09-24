@@ -32,6 +32,8 @@ import { Input } from './types';
     [Input.GITHUB_HOSTNAME]: getInputValue[Input.GITHUB_HOSTNAME],
     [Input.GITHUB_TOKEN]: getInputValue[Input.GITHUB_TOKEN],
     [Input.OPEN_PULL_REQUEST]: getInputValue[Input.OPEN_PULL_REQUEST],
+    [Input.PULL_REQUEST_BODY]: getInputValue[Input.PULL_REQUEST_BODY],
+    [Input.PULL_REQUEST_TITLE]: getInputValue[Input.PULL_REQUEST_TITLE],
     [Input.REMOTE_REF]: getInputValue[Input.REMOTE_REF],
     [Input.REPOSITORY]: getInputValue[Input.REPOSITORY],
     [Input.SIGN_COMMIT]: getInputValue[Input.SIGN_COMMIT]

@@ -47,7 +47,9 @@ describe('CreatePullRequestCommand', () => {
     expect(mockGitHubClient.createPullRequest).toHaveBeenCalledTimes(1);
     expect(mockGitHubClient.createPullRequest).toHaveBeenCalledWith(
       'feature-branch',
-      'main'
+      'main',
+      undefined,
+      undefined
     );
   });
 

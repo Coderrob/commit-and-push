@@ -10,7 +10,8 @@ export default {
     '__mocks__',
     '/node_modules/',
     '/dist/',
-    'src/schema/'
+    '__tests__',
+    'types.ts'
   ],
   coverageReporters: ['json-summary', 'text', 'lcov'],
   coverageThreshold: {
@@ -35,14 +36,14 @@ export default {
     '^.+\\.ts$': [
       'ts-jest',
       {
-        tsconfig: 'tsconfig.eslint.json',
+        tsconfig: 'tsconfig.test.json',
         useESM: true
       }
     ]
   },
   transformIgnorePatterns: [
-    'node_modules/(?!@jest/)',
-    '.*\\.(spec|test)\\.(js|jsx)$'
+    'node_modules/(?!(p-retry|is-network-error|retry|@sindresorhus|delay|async-retry|import|got))'
   ],
+
   verbose: true
 };

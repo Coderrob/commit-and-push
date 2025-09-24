@@ -61,6 +61,8 @@ export class Action implements IExecute {
       forcePush: isTrue(inputs[Input.FORCE_PUSH]),
       githubToken: inputs[Input.GITHUB_TOKEN],
       openPullRequest: isTrue(inputs[Input.OPEN_PULL_REQUEST]),
+      pullRequestBody: inputs[Input.PULL_REQUEST_BODY],
+      pullRequestTitle: inputs[Input.PULL_REQUEST_TITLE],
       remoteRef: inputs[Input.REMOTE_REF],
       repository: inputs[Input.REPOSITORY],
       signCommit: isTrue(inputs[Input.SIGN_COMMIT])
@@ -72,7 +74,8 @@ export class Action implements IExecute {
         baseUrl: `https://api.${inputs[Input.GITHUB_HOSTNAME]}`,
         token: inputs[Input.GITHUB_TOKEN],
         owner,
-        repo
+        repo,
+        authorName: params.authorName
       });
 
     this.commands.push(
@@ -111,7 +114,12 @@ export class Action implements IExecute {
 
     if (params.openPullRequest) {
       this.commands.push(
-        new CreatePullRequestCommand(gitHubClient, params.branch)
+        new CreatePullRequestCommand(
+          gitHubClient,
+          params.branch,
+          params.pullRequestTitle,
+          params.pullRequestBody
+        )
       );
     }
   }

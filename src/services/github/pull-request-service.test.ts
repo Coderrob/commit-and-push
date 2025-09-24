@@ -28,9 +28,10 @@ describe('PullRequestService', () => {
   let mockHttpClient: jest.Mocked<http.HttpClient>;
   const mockParams = {
     baseUrl: 'https://api.github.com',
-    token: 'mock-token',
+    token: 'fake_test_token_pr_service_1234567890abcdef12345678',
     owner: 'test-owner',
-    repo: 'test-repo'
+    repo: 'test-repo',
+    authorName: 'Test Author'
   };
 
   beforeEach(() => {
@@ -74,7 +75,8 @@ describe('PullRequestService', () => {
           body: 'Test body'
         }),
         {
-          Authorization: 'Bearer mock-token',
+          Authorization:
+            'Bearer fake_test_token_pr_service_1234567890abcdef12345678',
           Accept: 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28'
         }
@@ -96,7 +98,7 @@ describe('PullRequestService', () => {
           head: 'feature-branch',
           base: 'main',
           title: 'Automated Pull Request',
-          body: 'Automated pull request created by GitHub Action.'
+          body: 'Automated pull request created by Test Author.'
         }),
         expect.any(Object)
       );

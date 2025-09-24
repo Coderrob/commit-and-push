@@ -15,7 +15,7 @@
  *
  */
 
-import { DirectoryNotFoundError } from './DirectoryNotFoundError';
+import { DirectoryNotFoundError } from './directory-not-found-error';
 
 describe('DirectoryNotFoundError', () => {
   describe('constructor', () => {

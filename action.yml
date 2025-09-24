@@ -79,6 +79,14 @@ inputs:
     default: 'false'
     description: Whether to open pull request (true/false)
     required: false
+  pull-request-title:
+    default: 'Automated Pull Request'
+    description: Title of the pull request when open-pull-request is true
+    required: false
+  pull-request-body:
+    default: ''
+    description: Body of the pull request when open-pull-request is true
+    required: false
 outputs:
   commit-hash:
     description: The hash of the latest commit

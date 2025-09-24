@@ -35,10 +35,40 @@ export class BaseHttpClient {
    * @returns The headers object.
    */
   protected getDefaultHeaders(token: string): Record<string, string> {
+    this.validateToken(token);
     return {
       Authorization: `Bearer ${token}`,
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28'
     };
+  }
+
+  /**
+   * Validates the GitHub token format and ensures it's not empty.
+   * @param token The token to validate
+   * @throws Error if token is invalid
+   */
+  private validateToken(token: string): void {
+    if (!token || token.trim().length === 0) {
+      throw new Error('GitHub token is required but was not provided');
+    }
+
+    // Basic token format validation (GitHub tokens start with 'ghp_' for personal access tokens)
+    // or other prefixes for different token types
+    const tokenPrefixes = [
+      'ghp_',
+      'gho_',
+      'ghu_',
+      'ghs_',
+      'ghr_',
+      'github_pat_'
+    ];
+    const isValidFormat =
+      tokenPrefixes.some((prefix) => token.startsWith(prefix)) ||
+      token.length >= 40; // Legacy tokens are typically 40+ chars
+
+    if (!isValidFormat) {
+      throw new Error('GitHub token format appears to be invalid');
+    }
   }
 }

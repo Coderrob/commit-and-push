@@ -15,7 +15,7 @@
  *
  */
 
-import { UnauthorizedCommandError } from './UnauthorizedCommandError';
+import { UnauthorizedCommandError } from './unauthorized-command-error';
 
 describe('UnauthorizedCommandError', () => {
   describe('constructor', () => {

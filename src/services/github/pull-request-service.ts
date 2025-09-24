@@ -17,9 +17,10 @@
 
 import * as core from '@actions/core';
 
-import { DEFAULT_BODY, DEFAULT_TITLE } from '../../constants';
+import { DEFAULT_TITLE } from '../../constants';
 import { BaseHttpClient } from '../../utils/base-http-client';
 import { Guards } from '../../utils/guards';
+import { RetryHelper } from '../../utils/retry-helper';
 import { PullRequestCreationError } from '../../errors';
 
 import type { GitHubParams } from '../../types';
@@ -42,7 +43,7 @@ export class PullRequestService extends BaseHttpClient {
     fromBranch: string,
     toBranch: string,
     title = DEFAULT_TITLE,
-    body = DEFAULT_BODY
+    body?: string
   ): Promise<void> {
     if (fromBranch === toBranch) {
       core.warning(
@@ -51,14 +52,30 @@ export class PullRequestService extends BaseHttpClient {
       return;
     }
 
+    const defaultBody = `Automated pull request created by ${this.params.authorName}.`;
+    const prBody = body || defaultBody;
+
     const { baseUrl, owner, repo, token } = this.params;
     const url = [baseUrl, 'repos', owner, repo, 'pulls'].join('/');
 
     try {
-      await this.httpClient.postJson(
-        url,
-        JSON.stringify({ head: fromBranch, base: toBranch, title, body }),
-        this.getDefaultHeaders(token)
+      await RetryHelper.withRetry(
+        async () => {
+          await this.httpClient.postJson(
+            url,
+            JSON.stringify({
+              head: fromBranch,
+              base: toBranch,
+              title,
+              body: prBody
+            }),
+            this.getDefaultHeaders(token)
+          );
+        },
+        {
+          retries: 3,
+          minTimeout: 1000
+        }
       );
       core.info('Pull request created successfully.');
     } catch (error) {

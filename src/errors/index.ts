@@ -15,12 +15,12 @@
  *
  */
 
-export { NoChangesError } from './NoChangesError';
-export { InvalidInputError } from './InvalidInputError';
-export { SecurityError } from './SecurityError';
-export { UnauthorizedCommandError } from './UnauthorizedCommandError';
-export { DirectoryNotFoundError } from './DirectoryNotFoundError';
-export { GitCommandFailedError } from './GitCommandFailedError';
-export { PullRequestCreationError } from './PullRequestCreationError';
-export { InvalidRepositoryFormatError } from './InvalidRepositoryFormatError';
-export { InvalidInputKeyError } from './InvalidInputKeyError';
+export { NoChangesError } from './no-changes-error';
+export { InvalidInputError } from './invalid-input-error';
+export { SecurityError } from './security-error';
+export { UnauthorizedCommandError } from './unauthorized-command-error';
+export { DirectoryNotFoundError } from './directory-not-found-error';
+export { GitCommandFailedError } from './git-command-failed-error';
+export { PullRequestCreationError } from './pull-request-creation-error';
+export { InvalidRepositoryFormatError } from './invalid-repository-format-error';
+export { InvalidInputKeyError } from './invalid-input-key-error';

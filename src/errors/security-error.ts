@@ -19,5 +19,7 @@ export class SecurityError extends Error {
   constructor(message = 'Security risk detected') {
     super(message);
     this.name = 'SecurityError';
+    // Maintains proper prototype chain for instanceof checks
+    Object.setPrototypeOf(this, SecurityError.prototype);
   }
 }

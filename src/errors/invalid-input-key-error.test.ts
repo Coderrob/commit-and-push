@@ -15,7 +15,7 @@
  *
  */
 
-import { InvalidInputKeyError } from './InvalidInputKeyError';
+import { InvalidInputKeyError } from './invalid-input-key-error';
 
 describe('InvalidInputKeyError', () => {
   describe('constructor', () => {
