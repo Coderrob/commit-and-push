@@ -15,10 +15,25 @@
  *
  */
 
-export { CheckoutBranchCommand } from './checkout-branch.command';
-export { CommitChangesCommand } from './commit-changes.command';
-export { CreatePullRequestCommand } from './create-pull-request.command';
-export { FetchLatestCommand } from './fetch-latest.command';
-export { PushChangesCommand } from './push-changes.command';
-export { StageChangesCommand } from './stage-changes.command';
-export { UpdateConfigCommand } from './update-config.command';
+import * as core from '@actions/core';
+
+import type { ICommand, IGit } from '../types';
+
+/**
+ * Command to check out a branch in the Git repository.
+ */
+export class CheckoutBranchCommand implements ICommand {
+  constructor(
+    private readonly git: IGit,
+    private readonly branch: string,
+    private readonly createBranch: boolean
+  ) {}
+
+  /**
+   * Executes the command to check out the branch.
+   */
+  async execute(): Promise<void> {
+    core.info('Checking out branch...');
+    await this.git.checkoutBranch(this.branch, this.createBranch);
+  }
+}

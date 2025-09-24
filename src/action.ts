@@ -37,6 +37,12 @@ import type { IExecute, ICommand, IGit, IGitHubClient } from './types';
 export class Action implements IExecute {
   private readonly commands: ICommand[] = [];
 
+  /**
+   * Creates an instance of Action.
+   * @param inputs - The input parameters for the action
+   * @param git - Optional Git implementation (defaults to new Git instance)
+   * @param gitHub - Optional GitHub client implementation
+   */
   constructor(
     inputs: Record<Input, string>,
     private readonly git: IGit = new Git(),
@@ -124,6 +130,11 @@ export class Action implements IExecute {
     }
   }
 
+  /**
+   * Executes the action by running all configured commands in sequence.
+   * Handles errors and provides appropriate failure messages.
+   * @returns Promise that resolves when all commands complete successfully
+   */
   async execute(): Promise<void> {
     try {
       for (const command of this.commands) {

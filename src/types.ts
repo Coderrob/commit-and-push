@@ -62,7 +62,9 @@ export enum Input {
 }
 
 export enum Output {
-  COMMIT_HASH = 'commit-hash'
+  COMMIT_HASH = 'commit-hash',
+  PULL_REQUEST_NUMBER = 'pull-request-number',
+  PULL_REQUEST_URL = 'pull-request-url'
 }
 
 export enum Quote {
@@ -129,27 +131,69 @@ export interface IEntry<T> {
 }
 
 export interface IExecute {
+  /**
+   * Executes the main action or process.
+   */
   execute(): Promise<void>;
 }
 
 export interface ICommand {
+  /**
+   * Executes the command.
+   */
   execute(): Promise<void>;
 }
 
 export interface IGit {
+  /**
+   * Updates Git configuration.
+   * @param userName - User name for commits
+   * @param userEmail - User email for commits
+   * @param signCommit - Whether to sign commits
+   */
   updateConfig(
     userName: string,
     userEmail: string,
     signCommit?: boolean
   ): Promise<number>;
+  /**
+   * Fetches latest changes from remotes.
+   */
   fetchLatest(): Promise<number>;
+  /**
+   * Checks out a branch.
+   * @param branch - Branch name
+   * @param createNew - Whether to create if doesn't exist
+   */
   checkoutBranch(branch: string, createNew?: boolean): Promise<number>;
+  /**
+   * Stages changes for commit.
+   * @param directoryPath - Path to stage
+   */
   stageChanges(directoryPath: string): Promise<number>;
+  /**
+   * Commits staged changes.
+   * @param message - Commit message
+   * @param signCommit - Whether to sign
+   */
   commitChanges(message: string, signCommit?: boolean): Promise<number>;
+  /**
+   * Pushes changes to remote.
+   * @param remote - Remote name
+   * @param branch - Branch name
+   * @param force - Whether to force push
+   */
   pushChanges(remote: string, branch: string, force?: boolean): Promise<number>;
 }
 
 export interface IGitHubClient {
+  /**
+   * Creates a pull request on GitHub.
+   * @param fromBranch - Source branch
+   * @param toBranch - Target branch
+   * @param title - PR title
+   * @param body - PR body
+   */
   createPullRequest(
     fromBranch: string,
     toBranch: string,

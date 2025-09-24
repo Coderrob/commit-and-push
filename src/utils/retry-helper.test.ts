@@ -27,7 +27,7 @@ import pRetry from 'p-retry';
 const mockPRetry = pRetry as any;
 
 describe('RetryHelper', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

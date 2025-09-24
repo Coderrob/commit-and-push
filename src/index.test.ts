@@ -45,9 +45,8 @@ jest.mock('./action', () => ({
 }));
 
 describe('index.ts IIFE', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
-    jest.resetModules();
   });
 
   it('should import the index module without errors', async () => {

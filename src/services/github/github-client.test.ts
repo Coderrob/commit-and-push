@@ -35,16 +35,16 @@ describe('GitHubClient', () => {
     authorName: 'Test Author'
   };
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   beforeEach(() => {
     httpClient = {
       postJson: jest.fn()
     } as unknown as jest.Mocked<http.HttpClient>;
     jest.spyOn(http, 'HttpClient').mockImplementation(() => httpClient);
     warningSpy = jest.spyOn(core, 'warning').mockImplementation();
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   describe('createPullRequest', () => {

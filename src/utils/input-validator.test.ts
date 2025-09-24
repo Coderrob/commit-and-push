@@ -19,6 +19,10 @@ import { InputValidator } from './input-validator';
 import { SecurityError } from '../errors';
 
 describe('InputValidator', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('validateSecureInput', () => {
     it('should pass validation for safe input', () => {
       expect(() =>

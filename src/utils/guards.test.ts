@@ -18,6 +18,10 @@
 import { isError, isString, isTrue } from './guards';
 
 describe('guards', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('isString', () => {
     it.each([
       ['hello', true],

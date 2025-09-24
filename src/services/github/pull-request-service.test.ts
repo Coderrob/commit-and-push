@@ -34,6 +34,10 @@ describe('PullRequestService', () => {
     authorName: 'Test Author'
   };
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   beforeEach(() => {
     mockHttpClient = {
       postJson: jest.fn()
@@ -42,10 +46,6 @@ describe('PullRequestService', () => {
     (http.HttpClient as jest.Mock).mockImplementation(() => mockHttpClient);
 
     service = new PullRequestService(mockParams);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   describe('createPullRequest', () => {

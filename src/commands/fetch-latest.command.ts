@@ -15,10 +15,21 @@
  *
  */
 
-export { CheckoutBranchCommand } from './checkout-branch.command';
-export { CommitChangesCommand } from './commit-changes.command';
-export { CreatePullRequestCommand } from './create-pull-request.command';
-export { FetchLatestCommand } from './fetch-latest.command';
-export { PushChangesCommand } from './push-changes.command';
-export { StageChangesCommand } from './stage-changes.command';
-export { UpdateConfigCommand } from './update-config.command';
+import * as core from '@actions/core';
+
+import type { ICommand, IGit } from '../types';
+
+/**
+ * Command to fetch the latest changes from the remote repository.
+ */
+export class FetchLatestCommand implements ICommand {
+  constructor(private readonly git: IGit) {}
+
+  /**
+   * Executes the command to fetch the latest changes.
+   */
+  async execute(): Promise<void> {
+    core.info('Fetching latest...');
+    await this.git.fetchLatest();
+  }
+}

@@ -140,6 +140,13 @@ export const actionInputs: Record<Input, InputEntry> = {
 };
 
 export const getInputValue = new Proxy({} as Record<Input, string>, {
+  /**
+   * Gets the value of a GitHub Action input, falling back to the default if not provided.
+   * @param target - The proxy target (not used)
+   * @param key - The input key to retrieve
+   * @returns The input value or default
+   * @throws InvalidInputKeyError if the key is not a valid Input enum value
+   */
   get: (_, key: string) => {
     if (!Object.values(Input).includes(key as Input)) {
       throw new InvalidInputKeyError(key);

@@ -22,7 +22,9 @@ import { GitCommand } from '../types';
 import { ensureQuoted, execCommand, sanitizeInput } from './common';
 
 describe('Common', () => {
-  afterEach(jest.clearAllMocks);
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('ensureQuoted', () => {
     it.each([

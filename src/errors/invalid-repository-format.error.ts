@@ -15,10 +15,13 @@
  *
  */
 
-export { CheckoutBranchCommand } from './checkout-branch.command';
-export { CommitChangesCommand } from './commit-changes.command';
-export { CreatePullRequestCommand } from './create-pull-request.command';
-export { FetchLatestCommand } from './fetch-latest.command';
-export { PushChangesCommand } from './push-changes.command';
-export { StageChangesCommand } from './stage-changes.command';
-export { UpdateConfigCommand } from './update-config.command';
+export class InvalidRepositoryFormatError extends Error {
+  constructor(
+    message = 'Invalid repository format. Expected format: owner/repo'
+  ) {
+    super(message);
+    this.name = 'InvalidRepositoryFormatError';
+    // Maintains proper prototype chain for instanceof checks
+    Object.setPrototypeOf(this, InvalidRepositoryFormatError.prototype);
+  }
+}

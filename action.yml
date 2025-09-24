@@ -13,7 +13,7 @@
 # limitations under the License.
 
 author: Robert Lindley
-name: Commit and Push Changes
+name: Git Commit and Push Changes
 description: |
   This action automates committing and pushing code changes to a GitHub repository.
   It ensures updates are regularly applied without manual intervention while following security best practices.
@@ -68,7 +68,7 @@ inputs:
     description: Whether to sign commits using GPG (true/false)
     required: false
   commit-message:
-    default: 'Automated commit by GitHub Actions'
+    default: 'Automated commit-and-push by GitHub Actions'
     description: Commit message for the changes
     required: false
   force-push:
@@ -85,11 +85,21 @@ inputs:
     required: false
   pull-request-body:
     default: ''
-    description: Body of the pull request when open-pull-request is true
+    description:
+      Body of the pull request when open-pull-request is true. If empty,
+      defaults to 'Automated pull request created by {author-name}.'
     required: false
 outputs:
   commit-hash:
     description: The hash of the latest commit
+  pull-request-number:
+    description:
+      The number of the created pull request (only set when open-pull-request is
+      true)
+  pull-request-url:
+    description:
+      The URL of the created pull request (only set when open-pull-request is
+      true)
 
 runs:
   using: 'node20'

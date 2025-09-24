@@ -24,6 +24,10 @@ jest.mock('../constants', () => ({
 }));
 
 describe('BaseHttpClient', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   beforeEach(() => {
     (http.HttpClient as jest.Mock).mockClear();
   });
