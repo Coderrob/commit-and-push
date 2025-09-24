@@ -1,0 +1,40 @@
+title = "gitleaks config"
+
+[extend]
+# useDefault will extend the base configuration with the default gitleaks config:
+# https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
+useDefault = true
+
+[allowlist]
+description = "Allowlist for test files with fake tokens"
+paths = [
+    '''src/.*\.test\.ts$''',
+    '''src/.*\.spec\.ts$''',
+    '''__mocks__/.*''',
+    '''.*\.test\..*''',
+    '''.*\.spec\..*''',
+]
+
+# Specific patterns to ignore in test files
+regexes = [
+    '''(ghp|gho|ghu|ghs|ghr)_FAKE.*TEST''',
+    '''(ghp|gho|ghu|ghs|ghr)_.*FAKE.*''',
+    '''(ghp|gho|ghu|ghs|ghr)_.*TEST.*''',
+]
+
+# Specific commits to ignore (if needed)
+commits = []
+
+# Stop words that indicate a test token
+stopwords = [
+    'fake',
+    'test',
+    'mock',
+    'dummy',
+    'example',
+    'FAKE',
+    'TEST',
+    'MOCK',
+    'DUMMY',
+    'EXAMPLE',
+]

@@ -42,7 +42,7 @@ describe('BaseHttpClient', () => {
 
     it('should return correct headers with provided token', () => {
       const client = new TestClient();
-      const token = 'ghp_FAKE1234567890123456789012345678901234TEST'; // Valid GitHub token format
+      const token = 'ghp_1234567890abcdefFAKE123456789012FAKE'; // Valid GitHub token format
       const headers = client.getHeaders(token);
 
       expect(headers).toEqual({
@@ -69,13 +69,13 @@ describe('BaseHttpClient', () => {
     it('should accept various GitHub token formats', () => {
       const client = new TestClient();
       const validTokens = [
-        'ghp_FAKE1234567890123456789012345678901234TEST',
-        'gho_FAKE1234567890123456789012345678901234TEST',
-        'ghu_FAKE1234567890123456789012345678901234TEST',
-        'ghs_FAKE1234567890123456789012345678901234TEST',
-        'ghr_FAKE1234567890123456789012345678901234TEST',
-        'github_pat_FAKE12345678901234567890123456789012345678901234567890123456TEST',
-        'FAKE1234567890123456789012345678901234567890TEST' // Legacy format (40+ chars)
+        'ghp_1234567890abcdefFAKE123456789012FAKE',
+        'gho_1234567890abcdefFAKE123456789012FAKE',
+        'ghu_1234567890abcdefFAKE123456789012FAKE',
+        'ghs_1234567890abcdefFAKE123456789012FAKE',
+        'ghr_1234567890abcdefFAKE123456789012FAKE',
+        'github_pat_FAKE1234567890abcdefFAKE123456789012345678901234567890123456FAKE',
+        '1234567890abcdefFAKE123456789012345678901234567890FAKE' // Legacy format (40+ chars)
       ];
 
       validTokens.forEach((token) => {

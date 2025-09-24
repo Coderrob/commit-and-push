@@ -10,9 +10,9 @@ describe('SecureLogger', () => {
 
   describe('redactSensitiveInfo (tested via public methods)', () => {
     it('should redact GitHub personal access tokens', () => {
-      const message = 'Token: ghp_FAKE1234567890abcdef12345678abcdTEST';
+      const message = 'Token: ghp_1234567890abcdefFAKE123456789012FAKE';
       SecureLogger.info(message);
-      expect(core.info).toHaveBeenCalledWith('Token: ghp_...TEST');
+      expect(core.info).toHaveBeenCalledWith('Token: ghp_...FAKE');
     });
 
     it('should redact Bearer tokens', () => {
@@ -49,9 +49,9 @@ describe('SecureLogger', () => {
   describe('info', () => {
     it('should call core.info with redacted message', () => {
       const message =
-        'Info with token: ghp_FAKE1234567890abcdef12345678abcdTEST';
+        'Info with token: ghp_1234567890abcdefFAKE123456789012FAKE';
       SecureLogger.info(message);
-      expect(core.info).toHaveBeenCalledWith('Info with token: ghp_...TEST');
+      expect(core.info).toHaveBeenCalledWith('Info with token: ghp_...FAKE');
     });
   });
 
@@ -83,12 +83,12 @@ describe('SecureLogger', () => {
   describe('logObject', () => {
     it('should log redacted JSON string without label', () => {
       const obj = {
-        token: 'ghp_FAKE1234567890abcdef12345678abcdTEST',
+        token: 'ghp_1234567890abcdefFAKE123456789012FAKE',
         normal: 'value'
       };
       SecureLogger.logObject(obj);
       expect(core.info).toHaveBeenCalledWith(
-        expect.stringContaining('"token": "ghp_...TEST"')
+        expect.stringContaining('"token": "ghp_...FAKE"')
       );
     });
 
