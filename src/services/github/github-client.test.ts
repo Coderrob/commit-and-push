@@ -29,7 +29,7 @@ describe('GitHubClient', () => {
 
   const params: GitHubParams = {
     baseUrl: 'https://api.github.com',
-    token: 'ghp_1234567890abcdefFAKE123456789012FAKE',
+    token: 'fake_test_token_github_client_1234567890abcdef123456',
     owner: 'owner',
     repo: 'repo',
     authorName: 'Test Author'
@@ -60,7 +60,8 @@ describe('GitHubClient', () => {
           body: 'Automated pull request created by Test Author.'
         }),
         {
-          Authorization: 'Bearer ghp_1234567890abcdefFAKE123456789012FAKE',
+          Authorization:
+            'Bearer fake_test_token_github_client_1234567890abcdef123456',
           Accept: 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28'
         }

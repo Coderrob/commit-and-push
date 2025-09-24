@@ -42,7 +42,7 @@ describe('BaseHttpClient', () => {
 
     it('should return correct headers with provided token', () => {
       const client = new TestClient();
-      const token = 'ghp_1234567890abcdefFAKE123456789012FAKE'; // Valid GitHub token format
+      const token = 'fake_test_token_not_real_1234567890abcdef12345678'; // Valid GitHub token format (40+ chars)
       const headers = client.getHeaders(token);
 
       expect(headers).toEqual({
@@ -69,13 +69,13 @@ describe('BaseHttpClient', () => {
     it('should accept various GitHub token formats', () => {
       const client = new TestClient();
       const validTokens = [
-        'ghp_1234567890abcdefFAKE123456789012FAKE',
-        'gho_1234567890abcdefFAKE123456789012FAKE',
-        'ghu_1234567890abcdefFAKE123456789012FAKE',
-        'ghs_1234567890abcdefFAKE123456789012FAKE',
-        'ghr_1234567890abcdefFAKE123456789012FAKE',
-        'github_pat_FAKE1234567890abcdefFAKE123456789012345678901234567890123456FAKE',
-        '1234567890abcdefFAKE123456789012345678901234567890FAKE' // Legacy format (40+ chars)
+        'fake_test_token_personal_access_1234567890abcdef12345678',
+        'fake_test_token_oauth_token_1234567890abcdef12345678901',
+        'fake_test_token_user_token_1234567890abcdef123456789012',
+        'fake_test_token_server_token_1234567890abcdef1234567890',
+        'fake_test_token_refresh_token_1234567890abcdef123456789',
+        'fake_test_token_github_personal_access_token_1234567890abcdef123456789012345678901234567890123456',
+        'fake_test_token_legacy_format_1234567890abcdef12345678' // Legacy format (40+ chars)
       ];
 
       validTokens.forEach((token) => {
