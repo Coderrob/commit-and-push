@@ -10,27 +10,27 @@ describe('SecureLogger', () => {
 
   describe('redactSensitiveInfo (tested via public methods)', () => {
     it('should redact GitHub personal access tokens', () => {
-      const message = 'Token: ghp_1234567890abcdef1234567890abcdef123456';
+      const message = 'Token: ghp_FAKE1234567890abcdef12345678abcdTEST';
       SecureLogger.info(message);
-      expect(core.info).toHaveBeenCalledWith('Token: ghp_...123456');
+      expect(core.info).toHaveBeenCalledWith('Token: ghp_...TEST');
     });
 
     it('should redact Bearer tokens', () => {
-      const message = 'Authorization: Bearer abcdefghijklmnopqrstuvwxyz';
+      const message = 'Authorization: Bearer FAKE_TOKEN_FOR_TESTING_ONLY';
       SecureLogger.info(message);
-      expect(core.info).toHaveBeenCalledWith('Authorization: Bear...wxyz');
+      expect(core.info).toHaveBeenCalledWith('Authorization: Bear...ONLY');
     });
 
     it('should redact passwords', () => {
-      const message = 'password: mysecretpassword123';
+      const message = 'password: FAKE_PASSWORD_FOR_TESTING';
       SecureLogger.info(message);
-      expect(core.info).toHaveBeenCalledWith('pass...d123');
+      expect(core.info).toHaveBeenCalledWith('pass...TING');
     });
 
     it('should redact API keys', () => {
-      const message = 'api_key: abcdefghijklmnopqrstuvwxyz123456';
+      const message = 'api_key: FAKE_API_KEY_FOR_TESTING_PURPOSE_ONLY';
       SecureLogger.info(message);
-      expect(core.info).toHaveBeenCalledWith('api_...3456');
+      expect(core.info).toHaveBeenCalledWith('api_...ONLY');
     });
 
     it('should not redact very short token strings', () => {
@@ -49,56 +49,57 @@ describe('SecureLogger', () => {
   describe('info', () => {
     it('should call core.info with redacted message', () => {
       const message =
-        'Info with token: ghp_1234567890abcdef1234567890abcdef123456';
+        'Info with token: ghp_FAKE1234567890abcdef12345678abcdTEST';
       SecureLogger.info(message);
-      expect(core.info).toHaveBeenCalledWith('Info with token: ghp_...123456');
+      expect(core.info).toHaveBeenCalledWith('Info with token: ghp_...TEST');
     });
   });
 
   describe('warning', () => {
     it('should call core.warning with redacted message', () => {
-      const message = 'Warning with password: mysecretpassword123';
+      const message = 'Warning with password: FAKE_PASSWORD_FOR_TESTING';
       SecureLogger.warning(message);
-      expect(core.warning).toHaveBeenCalledWith('Warning with pass...d123');
+      expect(core.warning).toHaveBeenCalledWith('Warning with pass...TING');
     });
   });
 
   describe('error', () => {
     it('should call core.error with redacted message', () => {
-      const message = 'Error with api_key: abcdefghijklmnopqrstuvwxyz123456';
+      const message =
+        'Error with api_key: FAKE_API_KEY_FOR_TESTING_PURPOSE_ONLY';
       SecureLogger.error(message);
-      expect(core.error).toHaveBeenCalledWith('Error with api_...3456');
+      expect(core.error).toHaveBeenCalledWith('Error with api_...ONLY');
     });
   });
 
   describe('debug', () => {
     it('should call core.debug with redacted message', () => {
-      const message = 'Debug with Bearer abcdefghijklmnopqrstuvwxyz';
+      const message = 'Debug with Bearer FAKE_TOKEN_FOR_TESTING_ONLY';
       SecureLogger.debug(message);
-      expect(core.debug).toHaveBeenCalledWith('Debug with Bear...wxyz');
+      expect(core.debug).toHaveBeenCalledWith('Debug with Bear...ONLY');
     });
   });
 
   describe('logObject', () => {
     it('should log redacted JSON string without label', () => {
       const obj = {
-        token: 'ghp_1234567890abcdef1234567890abcdef123456',
+        token: 'ghp_FAKE1234567890abcdef12345678abcdTEST',
         normal: 'value'
       };
       SecureLogger.logObject(obj);
       expect(core.info).toHaveBeenCalledWith(
-        expect.stringContaining('"token": "ghp_...123456"')
+        expect.stringContaining('"token": "ghp_...TEST"')
       );
     });
 
     it('should log redacted JSON string with label', () => {
-      const obj = { password: 'mysecretpassword123' };
+      const obj = { password: 'FAKE_PASSWORD_FOR_TESTING' };
       SecureLogger.logObject(obj, 'Test Object');
       expect(core.info).toHaveBeenCalledWith(
         expect.stringMatching(/^Test Object: \{/)
       );
       expect(core.info).toHaveBeenCalledWith(
-        expect.stringContaining('"password": "mysecretpassword123"')
+        expect.stringContaining('"FAKE...TING"')
       );
     });
 

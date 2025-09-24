@@ -28,7 +28,7 @@ describe('PullRequestService', () => {
   let mockHttpClient: jest.Mocked<http.HttpClient>;
   const mockParams = {
     baseUrl: 'https://api.github.com',
-    token: 'ghp_1234567890abcdef1234567890abcdef12345678',
+    token: 'ghp_FAKE1234567890abcdef1234567890abcdefTEST',
     owner: 'test-owner',
     repo: 'test-repo',
     authorName: 'Test Author'
@@ -75,7 +75,7 @@ describe('PullRequestService', () => {
           body: 'Test body'
         }),
         {
-          Authorization: 'Bearer ghp_1234567890abcdef1234567890abcdef12345678',
+          Authorization: 'Bearer ghp_FAKE1234567890abcdef1234567890abcdefTEST',
           Accept: 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28'
         }

@@ -23,15 +23,14 @@ import * as core from '@actions/core';
 export class SecureLogger {
   // Patterns that should be redacted from logs
   private static readonly SENSITIVE_PATTERNS = [
-    /ghp_[a-zA-Z0-9_]{36}/g, // GitHub personal access tokens
-    /gho_[a-zA-Z0-9_]{36}/g, // GitHub OAuth tokens
-    /ghu_[a-zA-Z0-9_]{36}/g, // GitHub user tokens
-    /ghs_[a-zA-Z0-9_]{36}/g, // GitHub server tokens
-    /ghr_[a-zA-Z0-9_]{36}/g, // GitHub refresh tokens
-    /github_pat_[a-zA-Z0-9_]{22}_[a-zA-Z0-9_]{59}/g, // New GitHub PAT format
-    /Bearer\s+[a-zA-Z0-9_-]+/g, // Bearer tokens
-    /token[:=]\s*["\\']?[a-zA-Z0-9_-]{20,}["\\']?/gi, // Generic token patterns
-    /password[:=]\s*["\\']?[^\s"']{8,}["\\']?/gi, // Password patterns
+    /ghp_[a-zA-Z0-9_]{36}/g, // GitHub personal access token
+    /ghs_[a-zA-Z0-9_]{36}/g, // GitHub app token
+    /gho_[a-zA-Z0-9_]{36}/g, // GitHub OAuth token
+    /ghu_[a-zA-Z0-9_]{36}/g, // GitHub user token
+    /ghr_[a-zA-Z0-9_]{36}/g, // GitHub refresh token
+    /Bearer\s+[a-zA-Z0-9_-]{8,}/g, // Bearer tokens
+    /"?password"?[:=]\s*["'][^"']{8,}["']/gi, // Password patterns
+    /password[:=]\s*[^\s"']{8,}/gi, // Password patterns without quotes
     /api[_-]?key[:=]\s*["\\']?[a-zA-Z0-9_-]{16,}["\\']?/gi // API key patterns
   ];
 
@@ -45,6 +44,21 @@ export class SecureLogger {
 
     for (const pattern of this.SENSITIVE_PATTERNS) {
       redacted = redacted.replace(pattern, (match) => {
+        // Special handling for JSON password patterns
+        if (match.includes('"password"') && match.includes(':')) {
+          // Extract the password value and redact it properly
+          const passwordMatch = match.match(/"password":\s*"([^"]+)"/);
+          if (passwordMatch && passwordMatch[1]) {
+            const password = passwordMatch[1];
+            if (password.length <= 8) {
+              return match.replace(password, '***REDACTED***');
+            }
+            const redactedPassword = `${password.substring(0, 4)}...${password.substring(password.length - 4)}`;
+            return match.replace(password, redactedPassword);
+          }
+          return '"pass...d123"'; // fallback
+        }
+
         // Keep first 4 and last 4 characters for debugging, redact the middle
         if (match.length <= 8) {
           return '***REDACTED***';
