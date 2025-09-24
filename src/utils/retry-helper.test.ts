@@ -15,21 +15,16 @@
  *
  */
 
-// Mock p-retry module completely to avoid ES module issues
-const mockPRetry = jest.fn();
-
-jest.mock('p-retry', () => ({
-  __esModule: true,
-  default: mockPRetry,
-  AbortError: class extends Error {
-    constructor(message: string) {
-      super(message);
-      this.name = 'AbortError';
-    }
-  }
-}));
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { RetryHelper, DEFAULT_RETRY_CONFIG } from './retry-helper';
+
+// Import p-retry - Jest will automatically use the mock from __mocks__/p-retry/index.js
+import pRetry from 'p-retry';
+
+// Get reference to the mock function for test manipulation
+// Cast to any to avoid TypeScript conflicts with the mock implementation
+const mockPRetry = pRetry as any;
 
 describe('RetryHelper', () => {
   beforeEach(() => {
@@ -39,7 +34,7 @@ describe('RetryHelper', () => {
   describe('withRetry', () => {
     it('should succeed on first attempt', async () => {
       const mockOperation = jest.fn().mockResolvedValue('success');
-      mockPRetry.mockImplementation((fn) => fn());
+      mockPRetry.mockImplementation((fn: any) => fn());
 
       const result = await RetryHelper.withRetry(mockOperation);
 
@@ -64,7 +59,7 @@ describe('RetryHelper', () => {
         .mockRejectedValueOnce(new Error('502 Bad Gateway'))
         .mockResolvedValue('success');
 
-      mockPRetry.mockImplementation(async (fn, options) => {
+      mockPRetry.mockImplementation(async (fn: any, options: any) => {
         // Simulate retry behavior
         for (let i = 0; i <= options.retries; i++) {
           try {
@@ -98,7 +93,7 @@ describe('RetryHelper', () => {
         .fn()
         .mockRejectedValue(new Error('persistent network error'));
 
-      mockPRetry.mockImplementation(async (fn, options) => {
+      mockPRetry.mockImplementation(async (fn: any, options: any) => {
         // Simulate retry behavior that eventually fails
         for (let i = 0; i <= options.retries; i++) {
           try {
@@ -135,7 +130,7 @@ describe('RetryHelper', () => {
         return Promise.reject(RetryHelper.abortOnError(error));
       });
 
-      mockPRetry.mockImplementation(async (fn) => {
+      mockPRetry.mockImplementation(async (fn: any) => {
         // Simulate AbortError behavior - no retries
         return await fn();
       });
@@ -158,7 +153,7 @@ describe('RetryHelper', () => {
         .fn()
         .mockRejectedValue(new Error('rate limit exceeded'));
 
-      mockPRetry.mockImplementation(async (fn, options) => {
+      mockPRetry.mockImplementation(async (fn: any, options: any) => {
         // Simulate retry behavior that eventually fails
         for (let i = 0; i <= options.retries; i++) {
           try {
@@ -193,7 +188,7 @@ describe('RetryHelper', () => {
         minTimeout: 10
       };
 
-      mockPRetry.mockImplementation(async (fn, options) => {
+      mockPRetry.mockImplementation(async (fn: any, options: any) => {
         // Simulate retry behavior with custom config
         for (let i = 0; i <= options.retries; i++) {
           try {
@@ -224,7 +219,7 @@ describe('RetryHelper', () => {
         .mockRejectedValueOnce(new Error('network error'))
         .mockResolvedValue('success');
 
-      mockPRetry.mockImplementation(async (fn, options) => {
+      mockPRetry.mockImplementation(async (fn: any, options: any) => {
         // Simulate retry behavior
         for (let i = 0; i <= options.retries; i++) {
           try {
@@ -333,6 +328,80 @@ describe('RetryHelper', () => {
       expect(thrownError1!.name).toBe('AbortError');
       expect(thrownError2).not.toBeNull();
       expect(thrownError2!.name).toBe('AbortError');
+    });
+  });
+
+  describe('logger integration', () => {
+    it('should use provided logger for warning messages', async () => {
+      const mockLogger = {
+        warning: jest.fn()
+      };
+
+      const originalFn = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('network error'))
+        .mockResolvedValue('success');
+
+      mockPRetry.mockImplementation(async (fn: any, options: any) => {
+        // Simulate retry behavior with logging
+        for (let i = 0; i <= options.retries; i++) {
+          try {
+            return await fn();
+          } catch (error) {
+            if (i < options.retries) {
+              // Simulate what p-retry would do - call onFailedAttempt if provided
+              if (options.onFailedAttempt) {
+                await options.onFailedAttempt(error);
+              }
+            } else {
+              throw error;
+            }
+          }
+        }
+      });
+
+      await RetryHelper.withRetry(originalFn, { retries: 1 }, mockLogger);
+
+      // Verify the mock logger was called
+      expect(mockLogger.warning).toHaveBeenCalled();
+    });
+
+    it('should use default SecureLogger when no logger provided', async () => {
+      const originalFn = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('network error'))
+        .mockResolvedValue('success');
+
+      // Mock the SecureLogger warning method
+      const { SecureLogger } = await import('./secure-logger');
+      const mockWarning = jest
+        .spyOn(SecureLogger, 'warning')
+        .mockImplementation(() => {});
+
+      mockPRetry.mockImplementation(async (fn: any, options: any) => {
+        // Simulate retry behavior with logging
+        for (let i = 0; i <= options.retries; i++) {
+          try {
+            return await fn();
+          } catch (error) {
+            if (i < options.retries) {
+              // Simulate what p-retry would do - call onFailedAttempt if provided
+              if (options.onFailedAttempt) {
+                await options.onFailedAttempt(error);
+              }
+            } else {
+              throw error;
+            }
+          }
+        }
+      });
+
+      await RetryHelper.withRetry(originalFn, { retries: 1 });
+
+      // Verify SecureLogger was used
+      expect(mockWarning).toHaveBeenCalled();
+
+      mockWarning.mockRestore();
     });
   });
 });

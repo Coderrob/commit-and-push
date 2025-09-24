@@ -17,6 +17,14 @@
 
 import pRetry, { AbortError } from 'p-retry';
 import type { Options } from 'p-retry';
+import { SecureLogger } from './secure-logger';
+
+/**
+ * Logger interface for retry operations
+ */
+export interface ILogger {
+  warning(message: string): void;
+}
 
 /**
  * Type alias for retry configuration using p-retry options
@@ -42,18 +50,20 @@ export class RetryHelper {
    * Executes an operation with retry logic using p-retry
    * @param operation - The async operation to retry
    * @param config - Retry configuration
+   * @param logger - Optional logger instance (defaults to SecureLogger)
    * @returns Promise that resolves with the operation result
    */
   static async withRetry<T>(
     operation: () => Promise<T>,
-    config: RetryConfig = {}
+    config: RetryConfig = {},
+    logger: ILogger = SecureLogger
   ): Promise<T> {
     const finalConfig = { ...DEFAULT_RETRY_CONFIG, ...config };
 
     return pRetry(operation, {
       ...finalConfig,
       onFailedAttempt: (error) => {
-        console.warn(
+        logger.warning(
           `Operation failed (attempt ${error.attemptNumber}/${
             (finalConfig.retries ?? 0) + 1
           }). ${error.retriesLeft > 0 ? `Retrying...` : 'No more retries left.'}`
@@ -71,13 +81,15 @@ export class RetryHelper {
    * Creates a retryable version of an async function
    * @param fn - The function to make retryable
    * @param config - Retry configuration
+   * @param logger - Optional logger instance (defaults to SecureLogger)
    * @returns A retryable version of the function
    */
   static makeRetryable<T extends unknown[], R>(
     fn: (...args: T) => Promise<R>,
-    config: RetryConfig = {}
+    config: RetryConfig = {},
+    logger: ILogger = SecureLogger
   ): (...args: T) => Promise<R> {
-    return (...args: T) => this.withRetry(() => fn(...args), config);
+    return (...args: T) => this.withRetry(() => fn(...args), config, logger);
   }
 
   /**
